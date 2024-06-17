@@ -27,6 +27,8 @@ import java.util.List;
 public class SecurityConfig {
     private static final String AUTH_URL = "/auth/**";
     private static final String LOGOUT_URL = "/auth/logout";
+    private static final String ADMIN_AUTH_URL = "/admin/auth/login";
+
     private final JwtAuthenticationFilter  jwtAuthenticationFilter;
 
     @Autowired
@@ -50,6 +52,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, LOGOUT_URL).authenticated()
                     .requestMatchers(HttpMethod.POST, AUTH_URL).permitAll()
                     .requestMatchers(HttpMethod.PATCH, AUTH_URL).permitAll()
+                    .requestMatchers(HttpMethod.POST, ADMIN_AUTH_URL).permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling

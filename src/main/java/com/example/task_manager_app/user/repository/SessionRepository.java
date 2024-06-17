@@ -15,6 +15,7 @@ import io.lettuce.core.dynamic.annotation.Param;
 @Repository
 public interface SessionRepository extends JpaRepository<SessionEntity, Long> {
     Optional<SessionEntity> findByKey(String key);
+    void deleteByUserId(Long userId);
 
     @Modifying
     @Query("UPDATE SessionEntity s SET s.deletedAt = CURRENT_TIMESTAMP WHERE s.key = :key AND s.user.id = :userId AND s.expireAt >= :now AND s.deletedAt IS NULL")
