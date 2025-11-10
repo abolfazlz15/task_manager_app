@@ -1,35 +1,44 @@
 package com.example.task_manager_app.user.entity;
 import java.time.Instant;
+import java.util.Map;
 
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
+import com.example.task_manager_app.common.entity.BaseEntity;
 import com.example.task_manager_app.user.enums.UserGenderEnum;
 import com.example.task_manager_app.user.enums.UserRoleEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name="users")
-public class UserEntity {
+public class UserEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE)
     @Column
     private long id;
 
-    @Column(name="first_name", unique=true)
+    @Column(unique=true, nullable=false)
+    private String email;
+
+    @Column(unique=true, nullable=false)
     private String username;
 
     @Column(name="first_name")
@@ -38,49 +47,43 @@ public class UserEntity {
     @Column(name="last_name")
     private String lastName;
 
-    @Column(name="password")
+    @Column
     private String password;
-
-    @Column(name="phone")
-    private String phone;
-
+    
     @Column(name="password_update_at")
-    @CreationTimestamp
     private Instant passwordUpdateAt;
 
-    @Column(name="birthday")
-    @CreationTimestamp
+    @Column
+    private String phone;
+
+    @Column
     private Instant birthday;
 
-    @Column(name="gender")
+    @Column
+    @Enumerated(EnumType.STRING)
     private UserGenderEnum gender;
 
-    @Column(name="bio")
+    @Column
     private String bio;
 
     @Column(name="profile_image")
     private String profileImage;
 
     @Column(name="is_phone_verified")
-    private String isPhoneVerified;
+    private boolean isPhoneVerified;
 
     @Column(name="is_email_verified")
-    private String isEmailVerified;
+    private boolean isEmailVerified;
 
-    @Column(name="status")
+    @Column(nullable=false)
+    @Enumerated(EnumType.STRING)
     private UserStatusEnum status;
 
-    @Column(name="role")
+    @Column(nullable=false)
+    @Enumerated(EnumType.STRING)
     private UserRoleEnum role;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private JsonNode meta;
-
-    @Column(name="created_at")
-    @CreationTimestamp
-    private Instant createdAt;
-
-    @Column(name="updated_at")
-    @CreationTimestamp
-    private Instant updatedAt;
+    private Map<String, Object> meta;
 }
