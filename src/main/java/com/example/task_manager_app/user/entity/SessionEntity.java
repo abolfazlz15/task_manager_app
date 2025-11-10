@@ -3,10 +3,10 @@ package com.example.task_manager_app.user.entity;
 import java.time.Instant;
 import java.util.Map;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+
+import com.example.task_manager_app.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,15 +17,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name="sessions")
-public class SessionEntity {
+public class SessionEntity extends BaseEntity{
 
     @Id
     @Column
@@ -54,18 +57,8 @@ public class SessionEntity {
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> meta;
 
-    @Column(name="created_at")
-    @CreationTimestamp
-    private Instant createdAt;
-    
-    @Column(name="updated_at")
-    @UpdateTimestamp
-    private Instant updatedAt;
-    
-    @Column(name="deleted_at")
-    private Instant deletedAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable=false)
+    @JoinColumn(name="user_id", nullable=false)
     private UserEntity user;
 }
