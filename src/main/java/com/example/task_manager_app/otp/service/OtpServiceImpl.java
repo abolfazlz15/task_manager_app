@@ -1,18 +1,19 @@
 package com.example.task_manager_app.otp.service;
 
-import com.example.task_manager_app.common.exception.BadRequestException;
-import com.example.task_manager_app.otp.interfaces.OtpService;
-import com.example.task_manager_app.otp.dto.CreateOtpDto;
-import com.example.task_manager_app.otp.enums.OtpTypeEnum;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
+import com.example.task_manager_app.common.exception.BadRequestException;
+import com.example.task_manager_app.otp.dto.CreateOtpDto;
+import com.example.task_manager_app.otp.enums.OtpTypeEnum;
+import com.example.task_manager_app.otp.interfaces.OtpService;
 
 @Service
 public class OtpServiceImpl implements OtpService {
