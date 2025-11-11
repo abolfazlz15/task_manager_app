@@ -1,7 +1,7 @@
 package com.example.task_manager_app.otp.enums;
 
-public enum OtpOprationTypeEnum {
+public enum OtpOperationTypeEnum {
     REGISTER,
     FORGET_PASSWORD,
-    CHANGE_EMAIL
+    CHANGE_EMAIL,
 }
