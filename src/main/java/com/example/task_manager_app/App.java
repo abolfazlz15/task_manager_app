@@ -21,6 +21,15 @@ public class App {
         System.setProperty("OTP_LENGTH", dotenv.get("OTP_LENGTH"));
         System.setProperty("OTP_TTL", dotenv.get("OTP_TTL"));
         System.setProperty("MAX_ATTEMPT_LENGTH", dotenv.get("MAX_ATTEMPT_LENGTH"));
+
+        System.setProperty("MAIL_HOST", dotenv.get("MAIL_HOST"));
+        System.setProperty("MAIL_PROTOCOL", dotenv.get("MAIL_PROTOCOL"));
+        System.setProperty("MAIL_USERNAME", dotenv.get("MAIL_USERNAME"));
+        System.setProperty("MAIL_PASSWORD", dotenv.get("MAIL_PASSWORD"));
+        System.setProperty("MAIL_SMTP_AUTH", dotenv.get("MAIL_SMTP_AUTH"));
+        System.setProperty("MAIL_PORT", dotenv.get("MAIL_PORT", "587"));
+        System.setProperty("MAIL_STARTTLS", dotenv.get("MAIL_STARTTLS", "true"));
+        System.setProperty("MAIL_SMTP_SSL", dotenv.get("MAIL_SMTP_SSL"));
 		SpringApplication.run(App.class, args);
 	}
 
