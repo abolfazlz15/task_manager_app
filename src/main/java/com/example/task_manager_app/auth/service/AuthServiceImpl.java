@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.task_manager_app.auth.dto.LoginDto;
 import com.example.task_manager_app.auth.dto.RegisterRequest;
 import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
 import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
@@ -37,6 +38,24 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SessionServiceImpl sessionServiceImpl;
+
+    @Override
+    public void login(LoginDto body, String ip, HttpHeaders headers) {
+        UserEntity user = userRepository.findByUsernameOrEmailOrPhone(body.getUsername(), body.getEmail(), body.getPhone());
+
+        if(user == null) {
+            throw new BadRequestException("Invalid identifier please verify your input and try again");
+        }
+
+        boolean isMatch = passwordEncoder.matches(body.getPassword(), user.getPassword());
+
+        if(!isMatch) {
+            throw new BadRequestException("invalid password");
+        }
+
+        // TODO: generate JWT token
+    }
+
 
     @Override
     public void register(RegisterRequest registerRequest) {
@@ -107,5 +126,3 @@ public class AuthServiceImpl implements AuthService {
     }
 
 }
-
-
