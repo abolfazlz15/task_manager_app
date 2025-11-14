@@ -5,6 +5,7 @@ import com.example.task_manager_app.common.service.AesUtil;
 import com.example.task_manager_app.user.dto.SessionRefreshTokenPayload;
 import com.example.task_manager_app.user.entity.SessionEntity;
 import com.example.task_manager_app.user.entity.UserEntity;
+import com.example.task_manager_app.user.interfaces.SessionService;
 import com.example.task_manager_app.user.repository.SessionRepository;
 import com.example.task_manager_app.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,13 +17,13 @@ import java.util.Base64;
 import java.util.UUID;
 
 @Service
-public class SessionService {
+public class SessionServiceImpl implements SessionService {
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
     private final String secret;
     private final String salt;
     private final long expiresInSeconds;
-    public SessionService(
+    public SessionServiceImpl(
             UserRepository userRepository,
             SessionRepository sessionRepository,
             @Value("${session.secret}") String secret,
