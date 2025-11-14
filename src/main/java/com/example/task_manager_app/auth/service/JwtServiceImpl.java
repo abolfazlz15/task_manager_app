@@ -1,18 +1,21 @@
 package com.example.task_manager_app.auth.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
-import io.jsonwebtoken.security.Keys;
-
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.example.task_manager_app.auth.interfaces.JwtService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 @Service
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
@@ -23,6 +26,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
+    @Override
     public String generateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
             .setClaims(claims)
@@ -33,6 +37,7 @@ public class JwtService {
             .compact();
     }
 
+    @Override
     public Claims parseToken(String token) {
         return Jwts.parserBuilder()
             .setSigningKey(key())
