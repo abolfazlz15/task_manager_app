@@ -2,11 +2,22 @@ package com.example.task_manager_app.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalException {
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleInvalidArgument(MethodArgumentNotValidException ex) {
+        ErrorResponse err = new ErrorResponse("Invalid data",
+                HttpStatus.BAD_REQUEST.value(),
+                System.currentTimeMillis());
+
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
         ErrorResponse err = new ErrorResponse(ex.getMessage(),
