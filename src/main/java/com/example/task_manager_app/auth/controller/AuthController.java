@@ -37,7 +37,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public void login(@RequestBody @Valid LoginDto body, @RequestHeader HttpHeaders headers, HttpServletRequest req) {
-        authService.login(body, req.getRemoteAddr(), headers);
+    public VerifyRegisterResponse login(@RequestBody @Valid LoginDto body, @RequestHeader HttpHeaders headers, HttpServletRequest req) throws Exception {
+        return authService.login(body, req.getRemoteAddr(), headers);
     }
 }

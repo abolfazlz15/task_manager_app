@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.task_manager_app.auth.dto.LoginDto;
@@ -36,11 +36,11 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final OtpService otpService;
     private final JwtService jwtService;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final SessionServiceImpl sessionServiceImpl;
 
     @Override
-    public void login(LoginDto body, String ip, HttpHeaders headers) {
+    public VerifyRegisterResponse login(LoginDto body, String ip, HttpHeaders headers) throws Exception {
         UserEntity user = userRepository.findByUsernameOrEmailOrPhone(body.getUsername(), body.getEmail(), body.getPhone());
 
         if(user == null) {
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("invalid password");
         }
 
-        // TODO: generate JWT token
+        return generateTokens(user, ip, headers);
     }
 
 
