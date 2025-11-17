@@ -9,6 +9,7 @@ import com.example.task_manager_app.common.entity.BaseEntity;
 import com.example.task_manager_app.user.enums.UserGenderEnum;
 import com.example.task_manager_app.user.enums.UserRoleEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +34,7 @@ public class UserEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE)
     @Column
-    private long id;
+    private Long id;
 
     @Column(unique=true, nullable=false)
     private String email;
@@ -48,6 +49,7 @@ public class UserEntity extends BaseEntity {
     private String lastName;
 
     @Column
+    @JsonIgnore
     private String password;
     
     @Column(name="password_update_at")
