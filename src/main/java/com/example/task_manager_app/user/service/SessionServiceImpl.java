@@ -1,5 +1,13 @@
 package com.example.task_manager_app.user.service;
 
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.stereotype.Service;
+
 import com.example.task_manager_app.common.exception.BadRequestException;
 import com.example.task_manager_app.common.service.AesUtil;
 import com.example.task_manager_app.user.dto.SessionRefreshTokenPayload;
@@ -8,13 +16,6 @@ import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.interfaces.SessionService;
 import com.example.task_manager_app.user.repository.SessionRepository;
 import com.example.task_manager_app.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Base64;
-import java.util.UUID;
 
 @Service
 public class SessionServiceImpl implements SessionService {
@@ -23,6 +24,7 @@ public class SessionServiceImpl implements SessionService {
     private final String secret;
     private final String salt;
     private final long expiresInSeconds;
+
     public SessionServiceImpl(
             UserRepository userRepository,
             SessionRepository sessionRepository,
@@ -33,12 +35,13 @@ public class SessionServiceImpl implements SessionService {
         this.sessionRepository = sessionRepository;
         this.userRepository = userRepository;
         this.secret = secret;
-        this.salt =salt;
+        this.salt = salt;
         this.expiresInSeconds = expiresInSeconds;
     }
 
     public String sign(SessionRefreshTokenPayload payload) throws Exception {
-        String key = UUID.randomUUID().toString();
+        byte[] keyBytes = KeyGenerators.secureRandom(16).generateKey();
+        String key = Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes);
 
         Instant expireAt = Instant.now().plusSeconds(expiresInSeconds);
         UserEntity user = userRepository.findById(payload.getUserId())
@@ -53,13 +56,29 @@ public class SessionServiceImpl implements SessionService {
         session.setExpireAt(expireAt);
 
         sessionRepository.save(session);
+
         byte[] encrypted = AesUtil.encrypt(
-                key.getBytes(StandardCharsets.UTF_8),
+                keyBytes,
                 secret,
                 salt,
                 null
         );
 
         return Base64.getEncoder().encodeToString(encrypted);
+    }
+
+    @Override
+    public SessionEntity verify(String refreshToken) throws Exception {
+        byte[] encrypted = Base64.getDecoder().decode(refreshToken);
+        byte[] keyBytes = AesUtil.decrypt(encrypted, secret, salt);
+
+        String key = Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes);
+        Optional<SessionEntity> session = Optional.of(sessionRepository.findByKey(key)
+                .orElseThrow(() -> new BadRequestException("session not found")));
+
+        if (session.isEmpty() || session.get().getExpireAt().isBefore(Instant.now())) {
+            throw new BadRequestException("invalid or expired session");
+        }
+        return session.get();
     }
 }

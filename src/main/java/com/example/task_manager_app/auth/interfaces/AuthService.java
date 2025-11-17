@@ -1,11 +1,8 @@
 package com.example.task_manager_app.auth.interfaces;
 
+import com.example.task_manager_app.auth.dto.*;
 import org.springframework.http.HttpHeaders;
 
-import com.example.task_manager_app.auth.dto.LoginDto;
-import com.example.task_manager_app.auth.dto.RegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
 import com.example.task_manager_app.user.entity.UserEntity;
 
 public interface AuthService {
@@ -13,4 +10,5 @@ public interface AuthService {
     public VerifyRegisterResponse verifyRegister(VerifyRegisterRequest verifyRegisterRequest, String ip, HttpHeaders headers) throws Exception;
     public VerifyRegisterResponse generateTokens(UserEntity user, String ip, HttpHeaders headers) throws Exception;
     public VerifyRegisterResponse login(LoginDto body, String ip, HttpHeaders headers) throws Exception;
+    public VerifyRegisterResponse refreshToken(RefreshRequest refreshRequest) throws Exception;
 }
