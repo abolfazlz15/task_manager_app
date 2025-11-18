@@ -1,10 +1,9 @@
 package com.example.task_manager_app.user.interfaces;
 
 import com.example.task_manager_app.user.entity.UserEntity;
-import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Optional;
+import java.security.Principal;
 
 public interface UserService {
-    public Optional<UserEntity> getProfile(HttpServletRequest req);
+    public UserEntity getProfile(Principal principal);
 }
