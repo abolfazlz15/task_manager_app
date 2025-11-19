@@ -1,5 +1,6 @@
 package com.example.task_manager_app.auth.controller;
 
+import com.example.task_manager_app.auth.dto.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -7,15 +8,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.task_manager_app.auth.dto.LoginDto;
-import com.example.task_manager_app.auth.dto.RegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
 import com.example.task_manager_app.auth.interfaces.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
+import java.security.Principal;
 
 
 @RestController
@@ -39,5 +37,10 @@ public class AuthController {
     @PostMapping("/login")
     public VerifyRegisterResponse login(@RequestBody @Valid LoginDto body, @RequestHeader HttpHeaders headers, HttpServletRequest req) throws Exception {
         return authService.login(body, req.getRemoteAddr(), headers);
+    }
+
+    @PostMapping("/logout")
+    public void logout(Principal principal, @RequestBody @Valid LogoutRequest body) throws Exception {
+        authService.logout(principal, body);
     }
 }

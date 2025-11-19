@@ -10,6 +10,7 @@ import com.example.task_manager_app.user.repository.SessionRepository;
 import com.example.task_manager_app.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -23,6 +24,7 @@ public class SessionServiceImpl implements SessionService {
     private final String secret;
     private final String salt;
     private final long expiresInSeconds;
+
     public SessionServiceImpl(
             UserRepository userRepository,
             SessionRepository sessionRepository,
@@ -61,5 +63,16 @@ public class SessionServiceImpl implements SessionService {
         );
 
         return Base64.getEncoder().encodeToString(encrypted);
+    }
+
+    @Override
+    @Transactional
+    public boolean revoke(long userId, String token) throws Exception {
+        byte[] decodedToken = Base64.getDecoder().decode(token);
+        byte[] decryptedBytes = AesUtil.decrypt(decodedToken, secret, salt);
+        String key = new String(decryptedBytes, StandardCharsets.UTF_8);
+
+        int affectedRows = sessionRepository.softDeleteByKeyAndUserId(key, userId, Instant.now());
+        return affectedRows > 0;
     }
 }
