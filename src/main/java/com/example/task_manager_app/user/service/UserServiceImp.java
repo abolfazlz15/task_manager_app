@@ -18,7 +18,7 @@ public class UserServiceImp implements UserService {
     }
 
     public UserEntity getProfile(Principal principal) {
-        Optional<UserEntity> user = userRepository.findByEmail(principal.getName());
+        Optional<UserEntity> user = userRepository.findById(Long.parseLong(principal.getName()));
 
         if(user.isEmpty()) {
             throw new NotFoundException("user not found");

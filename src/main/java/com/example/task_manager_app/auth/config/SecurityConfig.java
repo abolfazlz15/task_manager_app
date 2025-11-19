@@ -1,6 +1,5 @@
 package com.example.task_manager_app.auth.config;
 
-import com.example.task_manager_app.user.enums.UserRoleEnum;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +26,7 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     private static final String AUTH_URL = "/auth/**";
+    private static final String LOGOUT_URL = "/auth/logout";
     private final JwtAuthenticationFilter  jwtAuthenticationFilter;
 
     @Autowired
@@ -47,6 +47,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(HttpMethod.POST, LOGOUT_URL).authenticated()
                     .requestMatchers(HttpMethod.POST, AUTH_URL).permitAll()
                     .anyRequest().authenticated()
             )

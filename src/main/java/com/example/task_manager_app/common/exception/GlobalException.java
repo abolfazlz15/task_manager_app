@@ -51,6 +51,16 @@ public class GlobalException {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ErrorResponse err = new ErrorResponse(BAD_REQUEST_MESSAGE,
+                HttpStatus.BAD_REQUEST.value(),
+                System.currentTimeMillis());
+
+        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
+        return new ResponseEntity<>(res, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ApiResponse<ErrorResponse>> handleUnauthorizedException(UnauthorizedException ex) {
         ErrorResponse err = new ErrorResponse(ex.getMessage(),
                 HttpStatus.UNAUTHORIZED.value(),
