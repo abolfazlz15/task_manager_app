@@ -1,4 +1,4 @@
-package com.example.task_manager_app.common.exception;
+package com.example.task_manager_app.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

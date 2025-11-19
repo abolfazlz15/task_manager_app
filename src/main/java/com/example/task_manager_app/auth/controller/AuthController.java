@@ -1,5 +1,7 @@
 package com.example.task_manager_app.auth.controller;
 
+import java.security.Principal;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.task_manager_app.auth.dto.LoginDto;
+import com.example.task_manager_app.auth.dto.LogoutRequest;
 import com.example.task_manager_app.auth.dto.RefreshRequest;
 import com.example.task_manager_app.auth.dto.RegisterRequest;
 import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
@@ -17,7 +20,6 @@ import com.example.task_manager_app.auth.interfaces.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-
 
 @RestController
 @RequestMapping("/auth")
@@ -44,5 +46,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<VerifyRegisterResponse> refreshToken(@RequestBody @Valid RefreshRequest body) throws Exception {
         return ResponseEntity.ok(authService.refreshToken(body));
+    }
+
+    @PostMapping("/logout")
+    public void logout(Principal principal, @RequestBody @Valid LogoutRequest body) throws Exception {
+        authService.logout(principal, body);
     }
 }

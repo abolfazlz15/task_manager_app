@@ -2,12 +2,13 @@ package com.example.task_manager_app.user.controller;
 
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.interfaces.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("user")
@@ -20,8 +21,7 @@ public class UserController {
     }
 
     @GetMapping("profile")
-    public ResponseEntity<UserEntity> getProfile(HttpServletRequest req) {
-        return userService.getProfile(req).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserEntity> getProfile(Principal principal) {
+        return ResponseEntity.ok(userService.getProfile(principal));
     }
 }

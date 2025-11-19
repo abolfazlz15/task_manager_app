@@ -1,5 +1,6 @@
 package com.example.task_manager_app.user.service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
@@ -7,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.task_manager_app.common.exception.BadRequestException;
 import com.example.task_manager_app.common.service.AesUtil;
@@ -81,4 +83,16 @@ public class SessionServiceImpl implements SessionService {
         }
         return session.get();
     }
+        
+    @Transactional
+    public boolean revoke(long userId, String token) throws Exception {
+        byte[] decodedToken = Base64.getDecoder().decode(token);
+        byte[] decryptedBytes = AesUtil.decrypt(decodedToken, secret, salt);
+        String key = new String(decryptedBytes, StandardCharsets.UTF_8);
+
+        int affectedRows = sessionRepository.softDeleteByKeyAndUserId(key, userId, Instant.now());
+        return affectedRows > 0;
+    }
 }
+
+

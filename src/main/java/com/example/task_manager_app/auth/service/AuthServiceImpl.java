@@ -1,8 +1,11 @@
 package com.example.task_manager_app.auth.service;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.example.task_manager_app.auth.dto.*;
+import com.example.task_manager_app.common.exception.NotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -107,7 +110,16 @@ public class AuthServiceImpl implements AuthService {
          return new VerifyRegisterResponse(accessToken, refreshToken);
      }
 
-     private String generateRefreshToken(UserEntity user, String ip, HttpHeaders headers) throws Exception {
+    @Override
+    public void logout(Principal principal, LogoutRequest body) throws Exception {
+        boolean isDeleted = sessionServiceImpl.revoke(Long.parseLong(principal.getName()), body.getRefreshToken());
+
+        if (!isDeleted) {
+           throw new NotFoundException("Session not found");
+        }
+    }
+
+    private String generateRefreshToken(UserEntity user, String ip, HttpHeaders headers) throws Exception {
         String userAgent = headers.getFirst(HttpHeaders.USER_AGENT);
         String device = DeviceParser.parseDevice(userAgent);
 
@@ -126,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
         claims.put("role", user.getRole().name());
         return jwtService.generateToken(
             claims,
-            user.getEmail()
+            user.getId().toString()
         );
     }
 
