@@ -10,6 +10,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.task_manager_app.auth.dto.LoginDto;
+import com.example.task_manager_app.auth.dto.RefreshRequest;
+import com.example.task_manager_app.auth.dto.RegisterRequest;
+import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
+import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
 import com.example.task_manager_app.auth.interfaces.AuthService;
 import com.example.task_manager_app.auth.interfaces.JwtService;
 import com.example.task_manager_app.common.exception.BadRequestException;
@@ -20,11 +25,12 @@ import com.example.task_manager_app.otp.enums.OtpOperationTypeEnum;
 import com.example.task_manager_app.otp.enums.OtpTypeEnum;
 import com.example.task_manager_app.otp.interfaces.OtpService;
 import com.example.task_manager_app.user.dto.SessionRefreshTokenPayload;
+import com.example.task_manager_app.user.entity.SessionEntity;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.enums.UserRoleEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
+import com.example.task_manager_app.user.interfaces.SessionService;
 import com.example.task_manager_app.user.repository.UserRepository;
-import com.example.task_manager_app.user.service.SessionServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final OtpService otpService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final SessionServiceImpl sessionServiceImpl;
+    private final SessionService sessionService;
 
     @Override
     public VerifyRegisterResponse login(LoginDto body, String ip, HttpHeaders headers) throws Exception {
@@ -56,6 +62,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
+
     @Override
     public void register(RegisterRequest registerRequest) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
@@ -73,9 +80,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public VerifyRegisterResponse verifyRegister(VerifyRegisterRequest body, String ip, HttpHeaders headers) throws Exception {
         if (userRepository.findByEmail(body.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new BadRequestException("Email already in use");
         }
-
+        if (userRepository.findByUsername(body.getUsername()).isPresent()) {
+            throw new BadRequestException("Username already in use");
+        }
         otpService.verifyOtp(new VerifyOtpDto(
             body.getEmail(),
             body.getOtpCode(),
@@ -114,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
         String userAgent = headers.getFirst(HttpHeaders.USER_AGENT);
         String device = DeviceParser.parseDevice(userAgent);
 
-         return sessionServiceImpl.sign(new SessionRefreshTokenPayload(
+         return sessionService.sign(new SessionRefreshTokenPayload(
              user.getId(),
              user.getRole(),
              ip,
@@ -130,6 +139,17 @@ public class AuthServiceImpl implements AuthService {
         return jwtService.generateToken(
             claims,
             user.getId().toString()
+        );
+    }
+
+    public VerifyRegisterResponse refreshToken(RefreshRequest refreshRequest) throws Exception {
+        SessionEntity session = sessionService.verify(refreshRequest.getRefreshToken());
+        UserEntity user = userRepository.findById(
+            session.getUser().getId()
+        ).orElseThrow(() -> new BadRequestException("User not found"));
+        return new VerifyRegisterResponse(
+            generateAccessToken(user),
+            refreshRequest.getRefreshToken()
         );
     }
 
