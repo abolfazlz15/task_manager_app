@@ -19,4 +19,13 @@ public interface SessionRepository extends JpaRepository<SessionEntity, Long> {
     @Modifying
     @Query("UPDATE SessionEntity s SET s.deletedAt = CURRENT_TIMESTAMP WHERE s.key = :key AND s.user.id = :userId AND s.expireAt >= :now AND s.deletedAt IS NULL")
     int softDeleteByKeyAndUserId(@Param("key") String key, @Param("userId") Long userId, @Param("now") Instant now);
+
+    @Modifying
+    @Query("""
+        UPDATE SessionEntity s
+        SET s.deletedAt = CURRENT_TIMESTAMP
+        WHERE s.user.id = :userId
+          AND s.deletedAt IS NULL
+    """)
+    int purgeByUserId(@Param("userId") Long userId);
 }
