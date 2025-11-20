@@ -49,6 +49,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.POST, LOGOUT_URL).authenticated()
                     .requestMatchers(HttpMethod.POST, AUTH_URL).permitAll()
+                    .requestMatchers(HttpMethod.PATCH, AUTH_URL).permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling

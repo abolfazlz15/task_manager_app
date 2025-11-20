@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
 
+import com.example.task_manager_app.common.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,7 @@ public class SessionServiceImpl implements SessionService {
 
         Instant expireAt = Instant.now().plusSeconds(expiresInSeconds);
         UserEntity user = userRepository.findById(payload.getUserId())
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         SessionEntity session = new SessionEntity();
         session.setUser(user);
@@ -83,8 +84,8 @@ public class SessionServiceImpl implements SessionService {
         }
         return session.get();
     }
-        
     @Transactional
+    @Override
     public boolean revoke(long userId, String token) throws Exception {
         byte[] decodedToken = Base64.getDecoder().decode(token);
         byte[] decryptedBytes = AesUtil.decrypt(decodedToken, secret, salt);
@@ -93,6 +94,13 @@ public class SessionServiceImpl implements SessionService {
         int affectedRows = sessionRepository.softDeleteByKeyAndUserId(key, userId, Instant.now());
         return affectedRows > 0;
     }
+
+    @Transactional
+    @Override
+    public void purgeUserActiveTokens(long userId) {
+        sessionRepository.purgeByUserId(userId);
+    }
+
 }
 
 

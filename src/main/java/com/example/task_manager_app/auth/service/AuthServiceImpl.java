@@ -1,23 +1,19 @@
 package com.example.task_manager_app.auth.service;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.example.task_manager_app.auth.dto.*;
-import com.example.task_manager_app.common.exception.NotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.task_manager_app.auth.dto.LoginDto;
-import com.example.task_manager_app.auth.dto.RefreshRequest;
-import com.example.task_manager_app.auth.dto.RegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
 import com.example.task_manager_app.auth.interfaces.AuthService;
 import com.example.task_manager_app.auth.interfaces.JwtService;
 import com.example.task_manager_app.common.exception.BadRequestException;
+import com.example.task_manager_app.common.exception.NotFoundException;
 import com.example.task_manager_app.common.service.DeviceParser;
 import com.example.task_manager_app.otp.dto.CreateOtpDto;
 import com.example.task_manager_app.otp.dto.VerifyOtpDto;
@@ -112,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(Principal principal, LogoutRequest body) throws Exception {
-        boolean isDeleted = sessionServiceImpl.revoke(Long.parseLong(principal.getName()), body.getRefreshToken());
+        boolean isDeleted = sessionService.revoke(Long.parseLong(principal.getName()), body.getRefreshToken());
 
         if (!isDeleted) {
            throw new NotFoundException("Session not found");
@@ -141,16 +137,107 @@ public class AuthServiceImpl implements AuthService {
             user.getId().toString()
         );
     }
-
+    @Override
     public VerifyRegisterResponse refreshToken(RefreshRequest refreshRequest) throws Exception {
         SessionEntity session = sessionService.verify(refreshRequest.getRefreshToken());
         UserEntity user = userRepository.findById(
             session.getUser().getId()
-        ).orElseThrow(() -> new BadRequestException("User not found"));
+        ).orElseThrow(() -> new NotFoundException("User not found"));
         return new VerifyRegisterResponse(
             generateAccessToken(user),
             refreshRequest.getRefreshToken()
         );
+    }
+
+    private UserEntity getUserByOtp(OtpTypeEnum otpType, String otpId) {
+        return switch (otpType) {
+            case EMAIL -> userRepository.findByEmail(otpId).orElse(null);
+            case SMS -> userRepository.findByPhone(otpId).orElse(null);
+            default -> throw new BadRequestException("Invalid otp type");
+        };
+    }
+
+    @Override
+    public void forgetPasswordSendOtp(ForgetPasswordSendOtpRequest body) {
+        String otpId = body.getOtpType() == OtpTypeEnum.EMAIL
+                ? body.getEmail()
+                : body.getCellphone();
+
+        UserEntity user = getUserByOtp(body.getOtpType(), otpId);
+        if (user == null) {
+            throw new NotFoundException("user not found");
+        }
+
+        // create otp
+        String otp = otpService.createOtp(
+                new CreateOtpDto(
+                        otpId,
+                        body.getOtpType(),
+                        OtpOperationTypeEnum.FORGET_PASSWORD
+                )
+        );
+
+        // otpService.sendOtp(body.getOtpType(), otpId, otp);
+        System.out.println("otpId: " + otp);
+    }
+
+    @Override
+    public ForgetPasswordVerifyOtpResponse forgetPasswordVerifyOtp(ForgetPasswordVerifyOtpRequest body) {
+
+        String otpId = body.getOtpType() == OtpTypeEnum.EMAIL
+            ? body.getEmail()
+            : body.getCellphone();
+
+        UserEntity user = getUserByOtp(body.getOtpType(), otpId);
+        if (user == null) {
+            throw new NotFoundException("user not found");
+        }
+
+        otpService.verifyOtp(new VerifyOtpDto(
+            otpId,
+            body.getOtpCode(),
+            body.getOtpType(),
+            OtpOperationTypeEnum.FORGET_PASSWORD
+        ));
+
+        String token = otpService.createOtp(
+            new CreateOtpDto(
+                otpId,
+                OtpTypeEnum.TOKEN,
+                OtpOperationTypeEnum.FORGET_PASSWORD
+            )
+        );
+
+        return new ForgetPasswordVerifyOtpResponse(token);
+    }
+
+
+    @Override
+    public void forgetPassword(ForgetPasswordRequest body) {
+        System.out.println("forget password" + body);
+        String otpId = body.getOtpType() == OtpTypeEnum.EMAIL
+                ? body.getEmail()
+                : body.getCellphone();
+
+        UserEntity user = getUserByOtp(body.getOtpType(), otpId);
+        if (user == null) {
+            throw new NotFoundException("user not found");
+        }
+
+        otpService.verifyOtp(new VerifyOtpDto(
+                otpId,
+                body.getToken(),
+                OtpTypeEnum.TOKEN,
+                OtpOperationTypeEnum.FORGET_PASSWORD
+        ));
+
+        sessionService.purgeUserActiveTokens(user.getId());
+
+        String hashedPassword = passwordEncoder.encode(body.getPassword());
+        user.setPassword(hashedPassword);
+        user.setPasswordUpdateAt(Instant.now());
+
+        userRepository.save(user);
     }
 
 }

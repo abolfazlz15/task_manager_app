@@ -2,20 +2,17 @@ package com.example.task_manager_app.auth.controller;
 
 import java.security.Principal;
 
+import com.example.task_manager_app.auth.dto.*;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.task_manager_app.auth.dto.LoginDto;
-import com.example.task_manager_app.auth.dto.LogoutRequest;
-import com.example.task_manager_app.auth.dto.RefreshRequest;
-import com.example.task_manager_app.auth.dto.RegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
 import com.example.task_manager_app.auth.interfaces.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,7 +46,29 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(Principal principal, @RequestBody @Valid LogoutRequest body) throws Exception {
+    public ResponseEntity<Void> logout(Principal principal, @RequestBody @Valid LogoutRequest body) throws Exception {
         authService.logout(principal, body);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password/send/otp")
+    public ResponseEntity<Void> forgetPasswordSendOtp(@RequestBody @Valid ForgetPasswordSendOtpRequest body) {
+        body.validate();
+        authService.forgetPasswordSendOtp(body);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password/verify/otp")
+    public ResponseEntity<ForgetPasswordVerifyOtpResponse> forgetPasswordVerifyOtp(@RequestBody @Valid ForgetPasswordVerifyOtpRequest body) {
+        body.validate();
+        return ResponseEntity.ok(authService.forgetPasswordVerifyOtp(body));
+    }
+
+    @PatchMapping("/forgot-password/reset")
+    public ResponseEntity<Void> forgetPasswordReset(@RequestBody @Valid ForgetPasswordRequest body) throws Exception {
+        body.validate();
+        System.out.println(body);
+        authService.forgetPassword(body);
+        return ResponseEntity.ok().build();
     }
 }
