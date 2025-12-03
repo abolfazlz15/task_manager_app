@@ -1,13 +1,14 @@
 package com.example.task_manager_app.user.entity;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.example.task_manager_app.auth.entity.RoleEntity;
 import com.example.task_manager_app.common.entity.BaseEntity;
 import com.example.task_manager_app.user.enums.UserGenderEnum;
-import com.example.task_manager_app.user.enums.UserRoleEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,9 +16,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -81,9 +86,14 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatusEnum status;
 
-    @Column(nullable=false)
-    @Enumerated(EnumType.STRING)
-    private UserRoleEnum role;
+    @Column(nullable = false, name = "is_superuser", columnDefinition = "boolean default false")
+    private Boolean isSuperuser = false;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<RoleEntity> roles;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")

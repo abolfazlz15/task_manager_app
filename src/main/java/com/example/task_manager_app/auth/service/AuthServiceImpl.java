@@ -2,14 +2,28 @@ package com.example.task_manager_app.auth.service;
 
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import com.example.task_manager_app.auth.dto.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.task_manager_app.auth.dto.ForgetPasswordRequest;
+import com.example.task_manager_app.auth.dto.ForgetPasswordSendOtpRequest;
+import com.example.task_manager_app.auth.dto.ForgetPasswordVerifyOtpRequest;
+import com.example.task_manager_app.auth.dto.ForgetPasswordVerifyOtpResponse;
+import com.example.task_manager_app.auth.dto.LoginDto;
+import com.example.task_manager_app.auth.dto.LogoutRequest;
+import com.example.task_manager_app.auth.dto.RefreshRequest;
+import com.example.task_manager_app.auth.dto.RegisterRequest;
+import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
+import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
+import com.example.task_manager_app.auth.entity.RoleEntity;
 import com.example.task_manager_app.auth.interfaces.AuthService;
 import com.example.task_manager_app.auth.interfaces.JwtService;
 import com.example.task_manager_app.common.exception.BadRequestException;
@@ -23,7 +37,6 @@ import com.example.task_manager_app.otp.interfaces.OtpService;
 import com.example.task_manager_app.user.dto.SessionRefreshTokenPayload;
 import com.example.task_manager_app.user.entity.SessionEntity;
 import com.example.task_manager_app.user.entity.UserEntity;
-import com.example.task_manager_app.user.enums.UserRoleEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
 import com.example.task_manager_app.user.interfaces.SessionService;
 import com.example.task_manager_app.user.repository.UserRepository;
@@ -92,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(body.getEmail());
         user.setUsername(body.getUsername());
         user.setPassword(passwordEncoder.encode(body.getPassword()));
-        user.setRole(UserRoleEnum.USER);
+        user.setIsSuperuser(false);
         user.setStatus(UserStatusEnum.ACTIVE);
         userRepository.save(user);
 
@@ -121,7 +134,6 @@ public class AuthServiceImpl implements AuthService {
 
          return sessionService.sign(new SessionRefreshTokenPayload(
              user.getId(),
-             user.getRole(),
              ip,
              device,
              userAgent
@@ -129,9 +141,20 @@ public class AuthServiceImpl implements AuthService {
      }
 
     private String generateAccessToken(UserEntity user) {
+        List<Long> roleIds = Optional.ofNullable(user.getRoles())
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(RoleEntity::getId)
+                .distinct()
+                .collect(Collectors.toList());
+
+// if you use flag:
+//        if (user.getIsSuperuser()) {
+//            roleIds.add("SUPERUSER");
+//        }
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
-        claims.put("role", user.getRole().name());
+        claims.put("authorities", roleIds);
         return jwtService.generateToken(
             claims,
             user.getId().toString()
@@ -214,7 +237,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void forgetPassword(ForgetPasswordRequest body) {
-        System.out.println("forget password" + body);
         String otpId = body.getOtpType() == OtpTypeEnum.EMAIL
                 ? body.getEmail()
                 : body.getCellphone();

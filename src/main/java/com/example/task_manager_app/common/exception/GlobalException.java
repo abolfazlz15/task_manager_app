@@ -2,6 +2,7 @@ package com.example.task_manager_app.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -89,5 +90,14 @@ public class GlobalException {
 
         ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
         return new ResponseEntity<>(res, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAccessDeniedException(AccessDeniedException ex) {
+        ErrorResponse err = new ErrorResponse("Access Denied: You do not have permission to access this resource",
+                HttpStatus.FORBIDDEN.value(),
+                System.currentTimeMillis());
+
+        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
+        return new ResponseEntity<>(res, HttpStatus.FORBIDDEN);
     }
 }
