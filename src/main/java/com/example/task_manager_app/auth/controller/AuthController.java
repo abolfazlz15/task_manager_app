@@ -2,8 +2,6 @@ package com.example.task_manager_app.auth.controller;
 
 import java.security.Principal;
 
-import com.example.task_manager_app.auth.dto.*;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,6 +11,16 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.task_manager_app.auth.dto.ForgetPasswordRequest;
+import com.example.task_manager_app.auth.dto.ForgetPasswordSendOtpRequest;
+import com.example.task_manager_app.auth.dto.ForgetPasswordVerifyOtpRequest;
+import com.example.task_manager_app.auth.dto.ForgetPasswordVerifyOtpResponse;
+import com.example.task_manager_app.auth.dto.LoginDto;
+import com.example.task_manager_app.auth.dto.LogoutRequest;
+import com.example.task_manager_app.auth.dto.RefreshRequest;
+import com.example.task_manager_app.auth.dto.RegisterRequest;
+import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
+import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
 import com.example.task_manager_app.auth.interfaces.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,7 +75,6 @@ public class AuthController {
     @PatchMapping("/forgot-password/reset")
     public ResponseEntity<Void> forgetPasswordReset(@RequestBody @Valid ForgetPasswordRequest body) throws Exception {
         body.validate();
-        System.out.println(body);
         authService.forgetPassword(body);
         return ResponseEntity.ok().build();
     }

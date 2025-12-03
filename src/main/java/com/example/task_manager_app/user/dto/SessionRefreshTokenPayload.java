@@ -10,13 +10,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SessionRefreshTokenPayload {
     long userId;
-    UserRoleEnum role;
     String ip;
     String location;
     String device;
     String userAgent;
 
-    public SessionRefreshTokenPayload(long userId, UserRoleEnum role, String ip, String device, String userAgent) {
-        this(userId, role, ip, null, device, userAgent);
+    public SessionRefreshTokenPayload(long userId , String ip, String device, String userAgent) {
+        this(userId, ip, null, device, userAgent);
     }
 }
