@@ -86,6 +86,8 @@ public class GlobalException {
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 System.currentTimeMillis());
 
+        System.err.println(ex.getMessage());
+
         ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
         return new ResponseEntity<>(res, HttpStatus.INTERNAL_SERVER_ERROR);
     }
