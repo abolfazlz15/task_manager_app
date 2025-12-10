@@ -1,7 +1,6 @@
-package com.example.task_manager_app.schedule.entity;
+package com.example.task_manager_app.planning.table.entity;
 
 import com.example.task_manager_app.common.entity.BaseEntity;
-import com.example.task_manager_app.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +13,8 @@ import java.util.Map;
 @Getter
 @Setter
 @Entity
-@Table(name = "tables")
-public class TableEntity extends BaseEntity {
+@Table(name = "columns")
+public class ColumnEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE)
     @Column
@@ -24,17 +23,14 @@ public class TableEntity extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column
-    private String description;
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> meta;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable=false)
-    private UserEntity user;
+    @JoinColumn(name="table_id", nullable=false)
+    private TableEntity table;
 
-    @OneToMany(mappedBy = "table", cascade = CascadeType.ALL)
-    private List<ColumnEntity> columns;
+    @OneToMany(mappedBy = "column", cascade = CascadeType.ALL)
+    private List<RowEntity> rows;
 }
