@@ -1,6 +1,7 @@
-package com.example.task_manager_app.schedule.entity;
+package com.example.task_manager_app.planning.table.entity;
 
 import com.example.task_manager_app.common.entity.BaseEntity;
+import com.example.task_manager_app.planning.table.enums.DataTypeEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,9 @@ public class RowEntity extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String value;
+
+    @Column(nullable = false)
+    private DataTypeEnum dataType;
 
     @ManyToOne
     @JoinColumn(name = "column_id", nullable = false)
