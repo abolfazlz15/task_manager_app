@@ -31,7 +31,7 @@ public class TableEntity extends BaseEntity {
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> meta;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id", nullable=false)
     private UserEntity user;
 
