@@ -47,11 +47,9 @@ public class SessionServiceImpl implements SessionService {
         String key = Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes);
 
         Instant expireAt = Instant.now().plusSeconds(expiresInSeconds);
-        UserEntity user = userRepository.findById(payload.getUserId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
+        UserEntity userProxy = userRepository.getReferenceById(payload.getUserId());
         SessionEntity session = new SessionEntity();
-        session.setUser(user);
+        session.setUser(userProxy);
         session.setKey(key);
         session.setIp(payload.getIp());
         session.setUserAgent(payload.getUserAgent());
