@@ -4,6 +4,7 @@ import com.example.task_manager_app.common.exception.ForbiddenException;
 import com.example.task_manager_app.common.exception.NotFoundException;
 import com.example.task_manager_app.planning.table.dto.CreateTableRequest;
 import com.example.task_manager_app.planning.table.dto.TableResponse;
+import com.example.task_manager_app.planning.table.dto.UpdateTableDetailRequest;
 import com.example.task_manager_app.planning.table.dto.UpdateTableRequest;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
 import com.example.task_manager_app.planning.table.interfaces.TableMapper;
@@ -44,8 +45,9 @@ public class TableServiceImpl implements TableService {
         );
     }
 
+    @Override
     @Transactional
-    public void update(Long tableId, UpdateTableRequest tableData, Principal principal) {
+    public void updateDetail(Long tableId, UpdateTableDetailRequest tableDetailData, Principal principal) {
         TableEntity existingTable = tableRepository.findById(tableId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
 
@@ -56,7 +58,32 @@ public class TableServiceImpl implements TableService {
         columnRepository.deleteByTableId(tableId);
         existingTable.getColumns().clear();
 
-        tableMapper.updateEntityFromDto(tableData, existingTable);
+        tableMapper.updateEntityFromDto(tableDetailData, existingTable);
         tableRepository.save(existingTable);
     }
+
+    @Override
+    @Transactional
+    public TableResponse update(Long tableId, UpdateTableRequest tableData, Principal principal) {
+        TableEntity table = tableRepository.findById(tableId)
+                .orElseThrow(() -> new NotFoundException("Table Not Found"));
+
+        if (!table.getUser().getId().equals(Long.parseLong(principal.getName()))) {
+            throw new ForbiddenException("Access Denied");
+        }
+        if (tableData.getName() != null) {
+            table.setName(tableData.getName());
+        }
+        if (tableData.getDescription() != null) {
+            table.setDescription(tableData.getDescription());
+        }
+        TableEntity saved = tableRepository.save(table);
+        return new TableResponse(
+                saved.getId(),
+                saved.getName(),
+                saved.getDescription(),
+                saved.getCreatedAt()
+        );
+    }
+
 }

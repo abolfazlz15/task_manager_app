@@ -1,6 +1,6 @@
 package com.example.task_manager_app.planning.table.interfaces;
 
-import com.example.task_manager_app.planning.table.dto.UpdateTableRequest;
+import com.example.task_manager_app.planning.table.dto.UpdateTableDetailRequest;
 import com.example.task_manager_app.planning.table.entity.ColumnEntity;
 import com.example.task_manager_app.planning.table.entity.RowEntity;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
@@ -11,10 +11,10 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface TableMapper {
 
-    void updateEntityFromDto(UpdateTableRequest dto, @MappingTarget TableEntity entity);
+    void updateEntityFromDto(UpdateTableDetailRequest dto, @MappingTarget TableEntity entity);
 
-    ColumnEntity toEntity(UpdateTableRequest.ColumnRequest dto);
-    RowEntity toEntity(UpdateTableRequest.RowRequest dto);
+    ColumnEntity toEntity(UpdateTableDetailRequest.ColumnRequest dto);
+    RowEntity toEntity(UpdateTableDetailRequest.RowRequest dto);
 
     @AfterMapping
     default void linkRelations(@MappingTarget TableEntity table) {
