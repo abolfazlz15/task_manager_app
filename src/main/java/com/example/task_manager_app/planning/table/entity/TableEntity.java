@@ -8,8 +8,8 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -36,5 +36,8 @@ public class TableEntity extends BaseEntity {
     private UserEntity user;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL)
-    private List<ColumnEntity> columns;
+    private Set<ColumnEntity> columns;
+
+    @Column
+    private Short score = 0;
 }

@@ -1,9 +1,6 @@
 package com.example.task_manager_app.planning.table.controller;
 
-import com.example.task_manager_app.planning.table.dto.CreateTableRequest;
-import com.example.task_manager_app.planning.table.dto.TableResponse;
-import com.example.task_manager_app.planning.table.dto.UpdateTableDetailRequest;
-import com.example.task_manager_app.planning.table.dto.UpdateTableRequest;
+import com.example.task_manager_app.planning.table.dto.*;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +30,12 @@ public class TableController {
     @PatchMapping("/update/{tableId}")
     public ResponseEntity<TableResponse> updateTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableRequest body, Principal principal) {
         TableResponse table = tableService.update(tableId, body, principal);
+        return ResponseEntity.status(201).body(table);
+    }
+
+    @GetMapping("/detail/{tableId}")
+    public ResponseEntity<TableDetailResponse> updateTable(@PathVariable Long tableId, Principal principal) {
+        TableDetailResponse table = tableService.detail(tableId, principal);
         return ResponseEntity.status(201).body(table);
     }
 }

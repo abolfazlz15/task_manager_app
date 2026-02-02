@@ -24,6 +24,9 @@ public class UpdateTableDetailRequest {
         @NotBlank
         private String name;
 
+        @NotNull
+        private Integer index;
+
         @NotEmpty
         private List<RowRequest> rows;
     }
