@@ -5,10 +5,12 @@ import com.example.task_manager_app.common.exception.NotFoundException;
 import com.example.task_manager_app.planning.table.dto.*;
 import com.example.task_manager_app.planning.table.entity.ColumnEntity;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
+import com.example.task_manager_app.planning.table.entity.TableStatisticEntity;
 import com.example.task_manager_app.planning.table.interfaces.TableMapper;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
 import com.example.task_manager_app.planning.table.repository.ColumnRepository;
 import com.example.task_manager_app.planning.table.repository.TableRepository;
+import com.example.task_manager_app.planning.table.repository.TableStatisticRepository;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +27,15 @@ public class TableServiceImpl implements TableService {
     private final UserRepository userRepository;
     private final TableMapper tableMapper;
     private final ColumnRepository columnRepository;
+    private final TableStatisticRepository tableStatisticRepository;
 
     public TableResponse create(CreateTableRequest tableData, Principal principal) {
-        UserEntity user = userRepository.findById(Long.parseLong(principal.getName()))
-        .orElseThrow(() -> new NotFoundException("User Not Found"));
+        UserEntity userProxy = userRepository.getReferenceById(Long.parseLong(principal.getName()));
 
         TableEntity table = new TableEntity();
         table.setName(tableData.getName());
         table.setDescription(tableData.getDescription());
-        table.setUser(user);
+        table.setUser(userProxy);
 
         TableEntity tableSaved = tableRepository.save(table);
         return new TableResponse(
@@ -61,6 +63,12 @@ public class TableServiceImpl implements TableService {
         short score = (average == null) ? 0 : (short) Math.round(average);
         existingTable.setScore(score);
         tableRepository.save(existingTable);
+
+        TableStatisticEntity tableStatistic = new TableStatisticEntity();
+        tableStatistic.setScore(score);
+        tableStatistic.setTable(existingTable);
+
+        tableStatisticRepository.save(tableStatistic);
     }
 
     @Override
@@ -128,6 +136,19 @@ public class TableServiceImpl implements TableService {
                 column.getName(),
                 rows
         );
+    }
+
+    public List<TableStatisticsResponse> getTableStatistics(Principal principal, Long tableId, GetTableStatisticsRequest queryParam) {
+        TableEntity existingTable = tableRepository.findById(tableId)
+                .orElseThrow(() -> new NotFoundException("Table Not Found"));
+
+        if (!existingTable.getUser().getId().equals(Long.parseLong(principal.getName()))) {
+            throw new ForbiddenException("Access Denied");
+        }
+
+        List<TableStatisticEntity> statistics = tableStatisticRepository.findByTableAndBetween(existingTable, queryParam.getFrom(), queryParam.getTo());
+
+        return statistics.stream().map(item -> new TableStatisticsResponse(item.getId(), item.getScore(), item.getCreatedAt())).toList();
     }
 
 }

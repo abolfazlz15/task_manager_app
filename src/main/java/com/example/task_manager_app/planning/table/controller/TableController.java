@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/table")
@@ -37,5 +38,11 @@ public class TableController {
     public ResponseEntity<TableDetailResponse> updateTable(@PathVariable Long tableId, Principal principal) {
         TableDetailResponse table = tableService.detail(tableId, principal);
         return ResponseEntity.status(201).body(table);
+    }
+
+    @GetMapping("/statistics/{tableId}")
+    public ResponseEntity<List<TableStatisticsResponse>> getTableStatistics(Principal principal, @PathVariable("tableId") Long tableId, @Valid GetTableStatisticsRequest queryParam) {
+        List<TableStatisticsResponse> res = this.tableService.getTableStatistics(principal, tableId, queryParam);
+        return ResponseEntity.status(200).body(res);
     }
 }
