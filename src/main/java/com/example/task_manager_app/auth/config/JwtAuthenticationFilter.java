@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.example.task_manager_app.common.exception.UnauthorizedException;
+import com.example.task_manager_app.user.enums.UserStatusEnum;
+import com.example.task_manager_app.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,10 +35,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+
     @Autowired
-    public JwtAuthenticationFilter(JwtService jwtService, RoleRepository roleRepository) {
+    public JwtAuthenticationFilter(JwtService jwtService, RoleRepository roleRepository, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -60,6 +66,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtService.parseToken(token.replace(TOKEN_PREFIX, ""));
                 String subject = claims.getSubject();
+
+                if(!userRepository.existsByIdAndStatusIs(Long.parseLong(subject), UserStatusEnum.ACTIVE)) {
+                    throw new UnauthorizedException("Invalid user");
+                }
+
                 List<Long> authorities = claims.get(ROLE_CLAIM, List.class);
                 List<RoleEntity> test = roleRepository.findAllById(authorities);
 

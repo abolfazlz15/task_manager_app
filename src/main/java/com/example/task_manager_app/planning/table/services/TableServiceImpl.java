@@ -27,13 +27,12 @@ public class TableServiceImpl implements TableService {
     private final ColumnRepository columnRepository;
 
     public TableResponse create(CreateTableRequest tableData, Principal principal) {
-        UserEntity user = userRepository.findById(Long.parseLong(principal.getName()))
-        .orElseThrow(() -> new NotFoundException("User Not Found"));
+        UserEntity userProxy = userRepository.getReferenceById(Long.parseLong(principal.getName()));
 
         TableEntity table = new TableEntity();
         table.setName(tableData.getName());
         table.setDescription(tableData.getDescription());
-        table.setUser(user);
+        table.setUser(userProxy);
 
         TableEntity tableSaved = tableRepository.save(table);
         return new TableResponse(
