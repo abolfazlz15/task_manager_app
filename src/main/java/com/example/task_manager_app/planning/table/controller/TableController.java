@@ -1,8 +1,6 @@
 package com.example.task_manager_app.planning.table.controller;
 
-import com.example.task_manager_app.planning.table.dto.CreateTableRequest;
-import com.example.task_manager_app.planning.table.dto.TableResponse;
-import com.example.task_manager_app.planning.table.dto.UpdateTableRequest;
+import com.example.task_manager_app.planning.table.dto.*;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +21,21 @@ public class TableController {
         return ResponseEntity.status(201).body(table);
     }
 
-    @PutMapping("/update/{tableId}")
-    public ResponseEntity<Void> updateTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableRequest body, Principal principal) {
-        tableService.update(tableId, body, principal);
+    @PutMapping("/update/detail/{tableId}")
+    public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableDetailRequest body, Principal principal) {
+        tableService.updateDetail(tableId, body, principal);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/update/{tableId}")
+    public ResponseEntity<TableResponse> updateTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableRequest body, Principal principal) {
+        TableResponse table = tableService.update(tableId, body, principal);
+        return ResponseEntity.status(201).body(table);
+    }
+
+    @GetMapping("/detail/{tableId}")
+    public ResponseEntity<TableDetailResponse> updateTable(@PathVariable Long tableId, Principal principal) {
+        TableDetailResponse table = tableService.detail(tableId, principal);
+        return ResponseEntity.status(201).body(table);
     }
 }
