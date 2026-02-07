@@ -78,4 +78,10 @@ public class AuthController {
         authService.forgetPassword(body);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/admins/login")
+    public ResponseEntity<VerifyRegisterResponse> loginAdmin(@RequestBody @Valid LoginDto body, @RequestHeader HttpHeaders headers, HttpServletRequest req) throws Exception {
+        VerifyRegisterResponse res = this.authService.loginAdmin(body, req.getRemoteAddr(), headers);
+        return ResponseEntity.ok(res);
+    }
 }
