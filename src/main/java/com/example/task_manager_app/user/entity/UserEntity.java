@@ -3,6 +3,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
+import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -86,8 +87,9 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatusEnum status;
 
-    @Column(nullable = false, name = "is_superuser", columnDefinition = "boolean default false")
-    private Boolean isSuperuser = false;
+    @Column(nullable = false, name = "privilege")
+    @Enumerated(EnumType.STRING)
+    private PrivilegeEnum privilege = PrivilegeEnum.USER;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",

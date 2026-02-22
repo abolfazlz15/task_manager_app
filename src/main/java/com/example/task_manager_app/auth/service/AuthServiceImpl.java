@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.example.task_manager_app.common.exception.ForbiddenException;
-import com.example.task_manager_app.user.enums.UserRoleEnum;
+import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -103,7 +103,6 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(body.getEmail());
         user.setUsername(body.getUsername());
         user.setPassword(passwordEncoder.encode(body.getPassword()));
-        user.setIsSuperuser(false);
         user.setStatus(UserStatusEnum.ACTIVE);
         userRepository.save(user);
 
@@ -146,10 +145,6 @@ public class AuthServiceImpl implements AuthService {
                 .distinct()
                 .collect(Collectors.toList());
 
-// if you use flag:
-//        if (user.getIsSuperuser()) {
-//            roleIds.add("SUPERUSER");
-//        }
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
         claims.put("authorities", roleIds);
@@ -272,9 +267,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ForbiddenException("Admin is not registered");
         }
 
-        Optional<RoleEntity> role = user.getRoles().stream().findFirst();
-
-        if(role.isPresent() || user.getIsSuperuser()) {
+        if(user.getPrivilege().equals(PrivilegeEnum.ADMIN) || user.getPrivilege().equals(PrivilegeEnum.SUPER_ADMIN)) {
             boolean isMatch = passwordEncoder.matches(body.getPassword(), user.getPassword());
 
             if(!isMatch) {

@@ -5,13 +5,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 @Component("authManager")
 public class AuthorizationManager {
-    private static final String SUPERUSER = "SUPERUSER";
+    private static final String SUPERUSER = PrivilegeEnum.SUPER_ADMIN.toString();
 
     public boolean hasPermission(Authentication authentication, String permission) {
         if (authentication == null) return false;
