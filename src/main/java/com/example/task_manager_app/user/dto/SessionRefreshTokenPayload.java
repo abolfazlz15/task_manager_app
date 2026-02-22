@@ -1,6 +1,5 @@
 package com.example.task_manager_app.user.dto;
 
-import com.example.task_manager_app.user.enums.UserRoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.example.task_manager_app.common.constant.IConstant;
 import com.example.task_manager_app.common.exception.UnauthorizedException;
+import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
 import com.example.task_manager_app.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,11 +74,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
                 List<Long> authorities = claims.get(ROLE_CLAIM, List.class);
-                List<RoleEntity> test = roleRepository.findAllById(authorities);
+                List<RoleEntity> roles = roleRepository.findAllById(authorities);
+                List<SimpleGrantedAuthority> granted = new ArrayList<>();
+
+                if (userRepository.existsByIdAndPrivilegeIs(Long.parseLong(subject), PrivilegeEnum.SUPER_ADMIN)) {
+                    granted.add(new SimpleGrantedAuthority(PrivilegeEnum.SUPER_ADMIN.toString()));
+                }
 
                 if (Objects.nonNull(subject)) {
-                    List<SimpleGrantedAuthority> granted = new ArrayList<>();
-                     test.forEach(r -> {
+                    roles.forEach(r -> {
                         r.getPermissions().forEach(p -> {
                             granted.add(new SimpleGrantedAuthority(p.name()));
                         });
