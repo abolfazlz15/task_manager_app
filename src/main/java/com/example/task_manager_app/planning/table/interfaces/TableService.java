@@ -2,9 +2,9 @@ package com.example.task_manager_app.planning.table.interfaces;
 
 import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.planning.table.dto.*;
-import org.springframework.data.domain.Page;
 
 import java.security.Principal;
+import java.util.List;
 
 public interface TableService {
     public TableResponse create(CreateTableRequest tableData, Principal principal);

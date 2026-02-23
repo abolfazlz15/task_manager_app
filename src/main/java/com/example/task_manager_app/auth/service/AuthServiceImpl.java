@@ -2,13 +2,11 @@ package com.example.task_manager_app.auth.service;
 
 import java.security.Principal;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.example.task_manager_app.common.exception.ForbiddenException;
+import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -105,7 +103,6 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(body.getEmail());
         user.setUsername(body.getUsername());
         user.setPassword(passwordEncoder.encode(body.getPassword()));
-        user.setIsSuperuser(false);
         user.setStatus(UserStatusEnum.ACTIVE);
         userRepository.save(user);
 
@@ -148,10 +145,6 @@ public class AuthServiceImpl implements AuthService {
                 .distinct()
                 .collect(Collectors.toList());
 
-// if you use flag:
-//        if (user.getIsSuperuser()) {
-//            roleIds.add("SUPERUSER");
-//        }
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
         claims.put("authorities", roleIds);
@@ -260,6 +253,31 @@ public class AuthServiceImpl implements AuthService {
         user.setPasswordUpdateAt(Instant.now());
 
         userRepository.save(user);
+    }
+
+    @Override
+    public VerifyRegisterResponse loginAdmin(LoginDto body, String ip, HttpHeaders headers) throws Exception {
+        UserEntity user = userRepository.findByUsernameOrEmailOrPhone(body.getUsername(), body.getEmail(), body.getPhone());
+
+        if(user == null) {
+            throw new BadRequestException("Invalid identifier please verify your input and try again");
+        }
+
+        if(!user.getStatus().equals(UserStatusEnum.ACTIVE)) {
+            throw new ForbiddenException("Admin is not registered");
+        }
+
+        if(user.getPrivilege().equals(PrivilegeEnum.ADMIN) || user.getPrivilege().equals(PrivilegeEnum.SUPER_ADMIN)) {
+            boolean isMatch = passwordEncoder.matches(body.getPassword(), user.getPassword());
+
+            if(!isMatch) {
+                throw new BadRequestException("Invalid password");
+            }
+
+            return generateTokens(user, ip, headers);
+        }
+
+        throw new ForbiddenException("Access denied");
     }
 
 }

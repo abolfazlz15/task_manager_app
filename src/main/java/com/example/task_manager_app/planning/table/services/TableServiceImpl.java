@@ -6,6 +6,7 @@ import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.planning.table.dto.*;
 import com.example.task_manager_app.planning.table.entity.ColumnEntity;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
+import com.example.task_manager_app.planning.table.entity.TableStatisticEntity;
 import com.example.task_manager_app.planning.table.interfaces.TableMapper;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
 import com.example.task_manager_app.planning.table.repository.ColumnRepository;
@@ -34,6 +35,7 @@ public class TableServiceImpl implements TableService {
     private final UserRepository userRepository;
     private final TableMapper tableMapper;
     private final ColumnRepository columnRepository;
+    private final TableStatisticRepository tableStatisticRepository;
 
     @Override
     @Transactional
@@ -46,7 +48,7 @@ public class TableServiceImpl implements TableService {
         TableEntity table = new TableEntity();
         table.setName(tableData.getName());
         table.setDescription(tableData.getDescription());
-        table.setUser(user);
+        table.setUser(userProxy);
 
         TableEntity tableSaved = tableRepository.save(table);
         return new TableResponse(
@@ -75,6 +77,12 @@ public class TableServiceImpl implements TableService {
         short score = (average == null) ? 0 : (short) Math.round(average);
         existingTable.setScore(score);
         tableRepository.save(existingTable);
+
+        TableStatisticEntity tableStatistic = new TableStatisticEntity();
+        tableStatistic.setScore(score);
+        tableStatistic.setTable(existingTable);
+
+        tableStatisticRepository.save(tableStatistic);
     }
 
     @Override

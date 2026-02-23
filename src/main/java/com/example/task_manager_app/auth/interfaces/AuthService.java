@@ -17,4 +17,5 @@ public interface AuthService {
     public void forgetPasswordSendOtp(ForgetPasswordSendOtpRequest body);
     public ForgetPasswordVerifyOtpResponse forgetPasswordVerifyOtp(ForgetPasswordVerifyOtpRequest body);
     public void forgetPassword(ForgetPasswordRequest body) throws Exception;
+    public VerifyRegisterResponse loginAdmin(LoginDto body, String ip, HttpHeaders headers) throws Exception;
 }
