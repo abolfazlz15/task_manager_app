@@ -1,14 +1,17 @@
 package com.example.task_manager_app.planning.table.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.task_manager_app.planning.table.entity.TableEntity;
 
+
 @Repository
-public interface TableRepository extends JpaRepository<TableEntity, Long>  {
+public interface TableRepository extends JpaRepository<TableEntity, Long>, JpaSpecificationExecutor<TableEntity> {
 
     @Query("""
         SELECT DISTINCT t

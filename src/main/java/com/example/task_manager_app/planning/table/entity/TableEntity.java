@@ -6,8 +6,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +16,8 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "tables")
+@SQLDelete(sql = "UPDATE tables SET deleted_at = now() WHERE id=?")
+@SQLRestriction("deleted_at IS NULL")
 public class TableEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE)

@@ -14,4 +14,5 @@ public class CreateTableRequest {
     @Size(max=150)
     private String name;
     private String description;
+    private Long userId = null;
 }

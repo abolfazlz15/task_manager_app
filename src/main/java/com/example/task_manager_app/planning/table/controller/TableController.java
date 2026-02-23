@@ -1,5 +1,6 @@
 package com.example.task_manager_app.planning.table.controller;
 
+import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.planning.table.dto.*;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
 import jakarta.validation.Valid;
@@ -30,12 +31,30 @@ public class TableController {
     @PatchMapping("/update/{tableId}")
     public ResponseEntity<TableResponse> updateTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableRequest body, Principal principal) {
         TableResponse table = tableService.update(tableId, body, principal);
-        return ResponseEntity.status(201).body(table);
+        return ResponseEntity.status(200).body(table);
+    }
+
+    @GetMapping
+    public ResponseEntity<CustomPageResponse<TableResponse>> getAllTables(TableFilter filter, Principal principal) {
+        CustomPageResponse<TableResponse> table = tableService.getAllTable(filter, principal, false);
+        return ResponseEntity.status(200).body(table);
     }
 
     @GetMapping("/detail/{tableId}")
-    public ResponseEntity<TableDetailResponse> updateTable(@PathVariable Long tableId, Principal principal) {
-        TableDetailResponse table = tableService.detail(tableId, principal);
-        return ResponseEntity.status(201).body(table);
+    public ResponseEntity<TableDetailResponse> getTable(@PathVariable Long tableId, Principal principal) {
+        TableDetailResponse table = tableService.getTable(tableId, principal);
+        return ResponseEntity.status(200).body(table);
+    }
+
+    @GetMapping("/statistics/{tableId}")
+    public ResponseEntity<List<TableStatisticsResponse>> getTableStatistics(@PathVariable("tableId") Long tableId, @Valid GetTableStatisticsRequest queryParam, Principal principal) {
+        List<TableStatisticsResponse> res = this.tableService.getTableStatistics(principal, tableId, queryParam);
+        return ResponseEntity.status(200).body(res);
+    }
+
+    @DeleteMapping("/{tableId}")
+    public ResponseEntity<Void> deleteTable(@PathVariable("tableId") Long tableId) {
+        tableService.delete(tableId);
+        return ResponseEntity.noContent().build();
     }
 }
