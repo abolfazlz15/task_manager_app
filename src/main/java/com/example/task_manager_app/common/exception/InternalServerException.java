@@ -1,6 +1,6 @@
 package com.example.task_manager_app.common.exception;
 
-public class InternalServerException extends Throwable {
+public class InternalServerException extends RuntimeException {
 
     public InternalServerException(String message) {
         super(message);

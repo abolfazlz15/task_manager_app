@@ -1,5 +1,6 @@
 package com.example.task_manager_app.common.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.example.task_manager_app.common.response.ApiResponse;
 import com.example.task_manager_app.common.response.ErrorResponse;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalException {
     private static final String BAD_REQUEST_MESSAGE = "Invalid data";
@@ -86,11 +88,12 @@ public class GlobalException {
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 System.currentTimeMillis());
 
-        System.err.println(ex.getMessage());
+        log.error("Unhandled exception occurred: ", ex);
 
         ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
         return new ResponseEntity<>(res, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleAccessDeniedException(AccessDeniedException ex) {
         ErrorResponse err = new ErrorResponse("Access Denied: You do not have permission to access this resource",
