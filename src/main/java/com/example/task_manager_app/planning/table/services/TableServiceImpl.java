@@ -1,6 +1,5 @@
 package com.example.task_manager_app.planning.table.services;
 
-import com.example.task_manager_app.common.exception.ForbiddenException;
 import com.example.task_manager_app.common.exception.NotFoundException;
 import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.planning.table.dto.*;
@@ -63,12 +62,12 @@ public class TableServiceImpl implements TableService {
     @Override
     @Transactional
     public void updateDetail(Long tableId, UpdateTableDetailRequest tableDetailData, Principal principal) {
-        TableEntity existingTable = tableRepository.findById(tableId)
+        Long userId = tableDetailData.getUserId() != null
+                ? tableDetailData.getUserId()
+                : Long.parseLong(principal.getName());
+        TableEntity existingTable = tableRepository.findTableByUserIdAndTableId(tableId, userId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
 
-//        if (!existingTable.getUser().getId().equals(Long.parseLong(principal.getName()))) {
-//            throw new ForbiddenException("Access Denied");
-//        }
         columnRepository.deleteByTableId(tableId);
         existingTable.getColumns().clear();
 
@@ -88,15 +87,16 @@ public class TableServiceImpl implements TableService {
     @Override
     @Transactional
     public TableResponse update(Long tableId, UpdateTableRequest tableData, Principal principal) {
-        TableEntity table = tableRepository.findById(tableId)
+        Long userId = tableData.getUserId() != null
+                ? tableData.getUserId()
+                : Long.parseLong(principal.getName());
+        TableEntity table = tableRepository.findTableByUserIdAndTableId(userId, tableId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
-
-//        if (!table.getUser().getId().equals(Long.parseLong(principal.getName()))) {
-//            throw new ForbiddenException("Access Denied");
 
         if (tableData.getDescription() != null) {
             table.setDescription(tableData.getDescription());
         }
+        table.setName(tableData.getName());
         TableEntity saved = tableRepository.save(table);
         return new TableResponse(
                 saved.getId(),
@@ -108,15 +108,11 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
-    public TableDetailResponse getTable(Long tableId, Principal principal) {
-        TableEntity table = tableRepository.findTableWithColumnsAndRows(tableId);
+    public TableDetailResponse getTable(Long tableId, Long userId,Principal principal) {
+        Long existsUserId = userId != null ? userId : Long.parseLong(principal.getName());
+        TableEntity table = tableRepository.findTableWithColumnsAndRows(tableId, existsUserId)
+                .orElseThrow(() -> new NotFoundException("Table Not Found"));
 
-        if (table == null) {
-            throw new NotFoundException("Table not found");
-        }
-        if (!table.getUser().getId().equals(Long.parseLong(principal.getName()))) {
-            throw new ForbiddenException("Access Denied");
-        }
         List<TableDetailResponse.ColumnRequest> columns = table.getColumns()
                 .stream()
                 .map(this::mapColumn)
@@ -143,6 +139,7 @@ public class TableServiceImpl implements TableService {
         if (!isAdmin) {
             filter.setUserId(Long.parseLong(principal.getName()));
         }
+
         Specification<TableEntity> spec = TableSpecification.getTablesByFilter(filter);
         Page<TableEntity> tablePage = tableRepository.findAll(spec, pageable);
         Page<TableResponse> responsePage = tablePage.map(table -> TableResponse.builder()
@@ -153,7 +150,6 @@ public class TableServiceImpl implements TableService {
                 .createdAt(table.getCreatedAt())
                 .build()
         );
-
         return CustomPageResponse.fromPage(responsePage);
     }
 
@@ -177,13 +173,10 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
-    public List<TableStatisticsResponse> getTableStatistics(Principal principal, Long tableId, GetTableStatisticsRequest queryParam) {
-        TableEntity existingTable = tableRepository.findById(tableId)
+    public List<TableStatisticsResponse> getTableStatistics(Long tableId, GetTableStatisticsRequest queryParam, boolean isAdmin, Principal principal) {
+        Long existsUserId = isAdmin && queryParam.getUserId() != null ? queryParam.getUserId() : Long.parseLong(principal.getName());
+        TableEntity existingTable = tableRepository.findTableByUserIdAndTableId(tableId, existsUserId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
-
-        if (!existingTable.getUser().getId().equals(Long.parseLong(principal.getName()))) {
-            throw new ForbiddenException("Access Denied");
-        }
 
         List<TableStatisticEntity> statistics = tableStatisticRepository.findByTableAndBetween(existingTable, queryParam.getFrom(), queryParam.getTo());
 

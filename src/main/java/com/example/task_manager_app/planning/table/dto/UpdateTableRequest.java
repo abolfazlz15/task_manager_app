@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class UpdateTableRequest {
+    private Long userId = null;
     @NotBlank
     @Size(max=150)
     private String name;

@@ -12,10 +12,14 @@ import org.hibernate.type.SqlTypes;
 import java.util.Map;
 import java.util.Set;
 
+
 @Getter
 @Setter
 @Entity
-@Table(name = "tables")
+@Table(
+        name = "tables",
+        indexes = { @Index(name = "idx_tables_user_id_id", columnList = "user_id, id") }
+)
 @SQLDelete(sql = "UPDATE tables SET deleted_at = now() WHERE id=?")
 @SQLRestriction("deleted_at IS NULL")
 public class TableEntity extends BaseEntity {

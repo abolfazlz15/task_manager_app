@@ -14,20 +14,24 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class UpdateTableDetailRequest {
-    @NotEmpty
+    private Long userId = null;
+
+    @NotBlank(message = "Table name is required")
+    private String tableName;
+
     private List<ColumnRequest> columns;
 
     @Getter
     @Setter
     @AllArgsConstructor
     public static class ColumnRequest {
-        @NotBlank
+        @NotBlank(message = "Column name is required")
         private String name;
 
-        @NotNull
+        @NotNull(message = "Column index is required")
         private Integer index;
 
-        @NotEmpty
+        @NotEmpty(message = "At least one row is required")
         private List<RowRequest> rows;
     }
 
@@ -35,12 +39,13 @@ public class UpdateTableDetailRequest {
     @Setter
     @AllArgsConstructor
     public static class RowRequest {
-        @NotNull
+        @NotNull(message = "Row index is required")
         private Integer index;
 
-        @NotBlank
+        @NotBlank(message = "Row value is required")
         private String value;
 
+        @NotNull(message = "Data type is required")
         private DataTypeEnum dataType;
     }
 }

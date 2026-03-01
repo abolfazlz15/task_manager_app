@@ -3,10 +3,10 @@ package com.example.task_manager_app.admin.user.controller;
 import com.example.task_manager_app.admin.user.interfaces.AdminUserService;
 import com.example.task_manager_app.common.dto.FilterRequest;
 import com.example.task_manager_app.common.dto.ProfileRequest;
+import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.user.entity.UserEntity;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,8 +23,8 @@ public class AdminUserController {
     }
 
     @GetMapping
-    @PreAuthorize("@authManager.hasPermission(authentication, 'USER_READ')")
-    public ResponseEntity<Page<UserEntity>> getUsers(FilterRequest param, Pageable pageable) {
+   @PreAuthorize("@authManager.hasPermission(authentication, 'USER_READ')")
+    public ResponseEntity<CustomPageResponse<UserEntity>> getUsers(FilterRequest param, Pageable pageable) {
         return ResponseEntity.ok(adminUserService.getUsers(param, pageable));
     }
 

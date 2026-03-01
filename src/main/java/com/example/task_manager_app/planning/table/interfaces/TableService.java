@@ -10,8 +10,8 @@ public interface TableService {
     public TableResponse create(CreateTableRequest tableData, Principal principal);
     public void updateDetail(Long tableId, UpdateTableDetailRequest tableDetailData, Principal principal);
     public TableResponse update(Long tableId, UpdateTableRequest tableData, Principal principal);
-    public TableDetailResponse getTable(Long tableId, Principal principal);
+    public TableDetailResponse getTable(Long tableId, Long userId, Principal principal);
     public CustomPageResponse<TableResponse> getAllTable(TableFilter filter, Principal principal, boolean isAdmin);
-    public List<TableStatisticsResponse> getTableStatistics(Principal principal, Long tableId, GetTableStatisticsRequest queryParam);
+    public List<TableStatisticsResponse> getTableStatistics(Long tableId, GetTableStatisticsRequest queryParam, boolean isAdmin, Principal principal);
     public void delete(Long tableId);
 }

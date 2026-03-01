@@ -6,6 +6,7 @@ import com.example.task_manager_app.planning.table.interfaces.TableService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -24,12 +25,14 @@ public class TableController {
     }
 
     @PutMapping("/update/detail/{tableId}")
+    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
     public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableDetailRequest body, Principal principal) {
         tableService.updateDetail(tableId, body, principal);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/update/{tableId}")
+    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
     public ResponseEntity<TableResponse> updateTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableRequest body, Principal principal) {
         TableResponse table = tableService.update(tableId, body, principal);
         return ResponseEntity.status(200).body(table);
@@ -42,26 +45,23 @@ public class TableController {
     }
 
     @GetMapping("/detail/{tableId}")
+    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
     public ResponseEntity<TableDetailResponse> getTable(@PathVariable Long tableId, Principal principal) {
-        TableDetailResponse table = tableService.getTable(tableId, principal);
+        TableDetailResponse table = tableService.getTable(tableId, null, principal);
         return ResponseEntity.status(200).body(table);
     }
 
-    @GetMapping("/statistics/{tableId}")
-    public ResponseEntity<List<TableStatisticsResponse>> getTableStatistics(@PathVariable("tableId") Long tableId, @Valid GetTableStatisticsRequest queryParam, Principal principal) {
-        List<TableStatisticsResponse> res = this.tableService.getTableStatistics(principal, tableId, queryParam);
-        return ResponseEntity.status(200).body(res);
-    }
-
     @DeleteMapping("/{tableId}")
+    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
     public ResponseEntity<Void> deleteTable(@PathVariable("tableId") Long tableId) {
         tableService.delete(tableId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/statistics/{tableId}")
+    @GetMapping("/{tableId}/statistics")
+    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
     public ResponseEntity<List<TableStatisticsResponse>> getTableStatistics(Principal principal, @PathVariable("tableId") Long tableId, @Valid GetTableStatisticsRequest queryParam) {
-        List<TableStatisticsResponse> res = this.tableService.getTableStatistics(principal, tableId, queryParam);
+        List<TableStatisticsResponse> res = this.tableService.getTableStatistics(tableId, queryParam, false,principal);
         return ResponseEntity.status(200).body(res);
     }
 }

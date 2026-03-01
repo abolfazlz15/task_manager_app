@@ -10,7 +10,6 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface TableMapper {
-
     void updateEntityFromDto(UpdateTableDetailRequest dto, @MappingTarget TableEntity entity);
 
     ColumnEntity toEntity(UpdateTableDetailRequest.ColumnRequest dto);

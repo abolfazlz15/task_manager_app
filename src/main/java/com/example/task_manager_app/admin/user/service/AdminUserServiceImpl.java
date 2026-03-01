@@ -3,12 +3,12 @@ package com.example.task_manager_app.admin.user.service;
 import com.example.task_manager_app.admin.user.interfaces.AdminUserService;
 import com.example.task_manager_app.common.dto.FilterRequest;
 import com.example.task_manager_app.common.dto.ProfileRequest;
+import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import com.example.task_manager_app.user.interfaces.UserService;
 import com.example.task_manager_app.user.repository.UserRepository;
 import com.example.task_manager_app.user.repository.UserSpecification;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +23,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public Page<UserEntity> getUsers(FilterRequest filter, Pageable pageable) {
-        return this.userRepository.findAll(UserSpecification.filterBy(filter, PrivilegeEnum.USER), pageable);
+    public CustomPageResponse<UserEntity> getUsers(FilterRequest filter, Pageable pageable) {
+        return CustomPageResponse.fromPage(this.userRepository.findAll(UserSpecification.filterBy(filter, PrivilegeEnum.USER), pageable));
     }
 
     @Override

@@ -5,12 +5,12 @@ import com.example.task_manager_app.admin.admin.interfaces.AdminService;
 import com.example.task_manager_app.common.dto.FilterRequest;
 import com.example.task_manager_app.common.dto.ProfileRequest;
 import com.example.task_manager_app.common.exception.NotFoundException;
+import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import com.example.task_manager_app.user.interfaces.UserService;
 import com.example.task_manager_app.user.repository.UserRepository;
 import com.example.task_manager_app.user.repository.UserSpecification;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +25,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<UserEntity> getAdmins(FilterRequest filter, Pageable pageable) {
-        return this.userRepository.findAll(UserSpecification.filterBy(filter, PrivilegeEnum.ADMIN), pageable);
+    public CustomPageResponse<UserEntity> getAdmins(FilterRequest filter, Pageable pageable) {
+        return CustomPageResponse.fromPage(this.userRepository.findAll(UserSpecification.filterBy(filter, PrivilegeEnum.ADMIN), pageable));
     }
 
     @Override

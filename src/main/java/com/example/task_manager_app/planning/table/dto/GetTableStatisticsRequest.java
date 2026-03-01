@@ -13,6 +13,8 @@ import java.time.Instant;
 @Setter
 @AllArgsConstructor
 public class GetTableStatisticsRequest {
+    Long userId;
+    
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Instant from;
