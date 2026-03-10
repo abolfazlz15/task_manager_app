@@ -2,67 +2,53 @@ package com.example.task_manager_app.user.service;
 
 import com.example.task_manager_app.auth.entity.RoleEntity;
 import com.example.task_manager_app.auth.repository.RoleRepository;
+import com.example.task_manager_app.user.dto.AdminRequestDTO;
 import com.example.task_manager_app.common.exception.BadRequestException;
 import com.example.task_manager_app.common.exception.NotFoundException;
 import com.example.task_manager_app.file.interfaces.FileService;
-import com.example.task_manager_app.common.dto.ProfileRequest;
-import com.example.task_manager_app.user.dto.UpdateProfileRequest;
+import com.example.task_manager_app.user.dto.ProfileResponseDTO;
+import com.example.task_manager_app.user.dto.UserRequestDTO;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
+import com.example.task_manager_app.user.interfaces.UserMapper;
 import com.example.task_manager_app.user.interfaces.UserService;
 import com.example.task_manager_app.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final FileService fileService;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository,  FileService fileService, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.fileService = fileService;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    public ProfileResponseDTO getProfile(Principal principal) {
+        UserEntity user = userRepository.findById(Long.parseLong(principal.getName()))
+                .orElseThrow(() -> new NotFoundException("user not found"));;
 
-    public UserEntity getProfile(Principal principal) {
-        Optional<UserEntity> user = userRepository.findById(Long.parseLong(principal.getName()));
-
-        if(user.isEmpty()) {
-            throw new NotFoundException("user not found");
-        }
-
-        return user.get();
+        return userMapper.toProfileResponseDTO(user);
     }
 
     @Override
-    public UserEntity updateProfile(Principal principal, UpdateProfileRequest body) throws IOException {
-        ProfileRequest profile = new ProfileRequest();
+    public ProfileResponseDTO updateUser(Principal principal, UserRequestDTO body) throws IOException {
+        AdminRequestDTO profile = userMapper.toAdminRequestDTO(body);
 
-        profile.setFirstName(body.getFirstName());
-        profile.setLastName(body.getLastName());
-        profile.setBirthday(body.getBirthday());
-        profile.setGender(body.getGender());
-        profile.setBio(body.getBio());
-        profile.setUsername(body.getUsername());
-        profile.setFile(body.getFile());
-
-        return updateUser(Long.parseLong(principal.getName()), profile, PrivilegeEnum.USER);
+        UserEntity updatedUser = updateProfile(Long.parseLong(principal.getName()), profile, PrivilegeEnum.USER);
+        return userMapper.toProfileResponseDTO(updatedUser);
     }
 
     @Override
-    public void addUser(ProfileRequest body, PrivilegeEnum privilege) throws Exception {
+    public void addUser(AdminRequestDTO body, PrivilegeEnum privilege) throws Exception {
         boolean isProfileExist = userRepository.existsByUsernameOrEmailOrPhone(body.getUsername(), body.getEmail(), body.getPhone());
         if(isProfileExist) {
             throw new BadRequestException("Invalid identifier please verify your input and try again");
@@ -95,7 +81,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity updateUser(long userId, ProfileRequest body, PrivilegeEnum privilege) throws IOException {
+    public UserEntity updateProfile(long userId, AdminRequestDTO body, PrivilegeEnum privilege) throws IOException {
         UserEntity user = userRepository.findByIdAndPrivilege(userId, privilege)
                 .orElseThrow(() -> new NotFoundException("user not found"));
 

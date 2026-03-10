@@ -5,34 +5,25 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.example.task_manager_app.auth.dto.*;
 import com.example.task_manager_app.common.exception.ForbiddenException;
 import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.task_manager_app.auth.dto.ForgetPasswordRequest;
-import com.example.task_manager_app.auth.dto.ForgetPasswordSendOtpRequest;
-import com.example.task_manager_app.auth.dto.ForgetPasswordVerifyOtpRequest;
-import com.example.task_manager_app.auth.dto.ForgetPasswordVerifyOtpResponse;
-import com.example.task_manager_app.auth.dto.LoginDto;
-import com.example.task_manager_app.auth.dto.LogoutRequest;
-import com.example.task_manager_app.auth.dto.RefreshRequest;
-import com.example.task_manager_app.auth.dto.RegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterRequest;
-import com.example.task_manager_app.auth.dto.VerifyRegisterResponse;
 import com.example.task_manager_app.auth.entity.RoleEntity;
 import com.example.task_manager_app.auth.interfaces.AuthService;
 import com.example.task_manager_app.auth.interfaces.JwtService;
 import com.example.task_manager_app.common.exception.BadRequestException;
 import com.example.task_manager_app.common.exception.NotFoundException;
 import com.example.task_manager_app.common.service.DeviceParser;
-import com.example.task_manager_app.otp.dto.CreateOtpDto;
-import com.example.task_manager_app.otp.dto.VerifyOtpDto;
+import com.example.task_manager_app.otp.dto.CreateOtpDTO;
+import com.example.task_manager_app.otp.dto.VerifyOtpDTO;
 import com.example.task_manager_app.otp.enums.OtpOperationTypeEnum;
 import com.example.task_manager_app.otp.enums.OtpTypeEnum;
 import com.example.task_manager_app.otp.interfaces.OtpService;
-import com.example.task_manager_app.user.dto.SessionRefreshTokenPayload;
+import com.example.task_manager_app.user.dto.RefreshTokenPayloadDTO;
 import com.example.task_manager_app.user.entity.SessionEntity;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
@@ -52,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final SessionService sessionService;
 
     @Override
-    public VerifyRegisterResponse login(LoginDto body, String ip, HttpHeaders headers) throws Exception {
+    public VerifyRegisterResponseDTO login(LoginRequestDTO body, String ip, HttpHeaders headers) throws Exception {
         UserEntity user = userRepository.findByUsernameOrEmailOrPhone(body.getUsername(), body.getEmail(), body.getPhone());
 
         if(user == null) {
@@ -71,12 +62,12 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public void register(RegisterRequest registerRequest) {
-        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+    public void register(RegisterRequestDTO registerRequestDTO) {
+        if (userRepository.findByEmail(registerRequestDTO.getEmail()).isPresent()) {
             throw new BadRequestException("Email already in use");
         }
-        CreateOtpDto otpTemplate = new CreateOtpDto(
-            registerRequest.getEmail(),
+        CreateOtpDTO otpTemplate = new CreateOtpDTO(
+            registerRequestDTO.getEmail(),
             OtpTypeEnum.EMAIL,
             OtpOperationTypeEnum.REGISTER
         );
@@ -85,14 +76,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public VerifyRegisterResponse verifyRegister(VerifyRegisterRequest body, String ip, HttpHeaders headers) throws Exception {
+    public VerifyRegisterResponseDTO verifyRegister(VerifyRegisterRequestDTO body, String ip, HttpHeaders headers) throws Exception {
         if (userRepository.findByEmail(body.getEmail()).isPresent()) {
             throw new BadRequestException("Email already in use");
         }
         if (userRepository.findByUsername(body.getUsername()).isPresent()) {
             throw new BadRequestException("Username already in use");
         }
-        otpService.verifyOtp(new VerifyOtpDto(
+        otpService.verifyOtp(new VerifyOtpDTO(
             body.getEmail(),
             body.getOtpCode(),
             OtpTypeEnum.EMAIL,
@@ -110,14 +101,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-     public VerifyRegisterResponse generateTokens(UserEntity user, String ip, HttpHeaders headers) throws Exception {
+     public VerifyRegisterResponseDTO generateTokens(UserEntity user, String ip, HttpHeaders headers) throws Exception {
          String refreshToken = generateRefreshToken(user, ip, headers);
          String accessToken = generateAccessToken(user);
-         return new VerifyRegisterResponse(accessToken, refreshToken);
+         return new VerifyRegisterResponseDTO(accessToken, refreshToken);
      }
 
     @Override
-    public void logout(Principal principal, LogoutRequest body) throws Exception {
+    public void logout(Principal principal, RefreshTokenRequestDTO body) throws Exception {
         boolean isDeleted = sessionService.revoke(Long.parseLong(principal.getName()), body.getRefreshToken());
 
         if (!isDeleted) {
@@ -129,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
         String userAgent = headers.getFirst(HttpHeaders.USER_AGENT);
         String device = DeviceParser.parseDevice(userAgent);
 
-         return sessionService.sign(new SessionRefreshTokenPayload(
+         return sessionService.sign(new RefreshTokenPayloadDTO(
              user.getId(),
              ip,
              device,
@@ -154,14 +145,14 @@ public class AuthServiceImpl implements AuthService {
         );
     }
     @Override
-    public VerifyRegisterResponse refreshToken(RefreshRequest refreshRequest) throws Exception {
-        SessionEntity session = sessionService.verify(refreshRequest.getRefreshToken());
+    public VerifyRegisterResponseDTO refreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO) throws Exception {
+        SessionEntity session = sessionService.verify(refreshTokenRequestDTO.getRefreshToken());
         UserEntity user = userRepository.findById(
             session.getUser().getId()
         ).orElseThrow(() -> new NotFoundException("User not found"));
-        return new VerifyRegisterResponse(
+        return new VerifyRegisterResponseDTO(
             generateAccessToken(user),
-            refreshRequest.getRefreshToken()
+            refreshTokenRequestDTO.getRefreshToken()
         );
     }
 
@@ -174,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void forgetPasswordSendOtp(ForgetPasswordSendOtpRequest body) {
+    public void forgetPasswordSendOtp(ForgetPasswordSendOtpRequestDTO body) {
         String otpId = body.getOtpType() == OtpTypeEnum.EMAIL
                 ? body.getEmail()
                 : body.getCellphone();
@@ -186,7 +177,7 @@ public class AuthServiceImpl implements AuthService {
 
         // create otp
         String otp = otpService.createOtp(
-                new CreateOtpDto(
+                new CreateOtpDTO(
                         otpId,
                         body.getOtpType(),
                         OtpOperationTypeEnum.FORGET_PASSWORD
@@ -198,7 +189,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ForgetPasswordVerifyOtpResponse forgetPasswordVerifyOtp(ForgetPasswordVerifyOtpRequest body) {
+    public ForgetPasswordVerifyOtpResponseDTO forgetPasswordVerifyOtp(ForgetPasswordVerifyOtpRequestDTO body) {
 
         String otpId = body.getOtpType() == OtpTypeEnum.EMAIL
             ? body.getEmail()
@@ -209,7 +200,7 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException("user not found");
         }
 
-        otpService.verifyOtp(new VerifyOtpDto(
+        otpService.verifyOtp(new VerifyOtpDTO(
             otpId,
             body.getOtpCode(),
             body.getOtpType(),
@@ -217,19 +208,19 @@ public class AuthServiceImpl implements AuthService {
         ));
 
         String token = otpService.createOtp(
-            new CreateOtpDto(
+            new CreateOtpDTO(
                 otpId,
                 OtpTypeEnum.TOKEN,
                 OtpOperationTypeEnum.FORGET_PASSWORD
             )
         );
 
-        return new ForgetPasswordVerifyOtpResponse(token);
+        return new ForgetPasswordVerifyOtpResponseDTO(token);
     }
 
 
     @Override
-    public void forgetPassword(ForgetPasswordRequest body) {
+    public void resetPassword(ResetPasswordRequestDTO body) {
         String otpId = body.getOtpType() == OtpTypeEnum.EMAIL
                 ? body.getEmail()
                 : body.getCellphone();
@@ -239,7 +230,7 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException("user not found");
         }
 
-        otpService.verifyOtp(new VerifyOtpDto(
+        otpService.verifyOtp(new VerifyOtpDTO(
                 otpId,
                 body.getToken(),
                 OtpTypeEnum.TOKEN,
@@ -256,7 +247,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public VerifyRegisterResponse loginAdmin(LoginDto body, String ip, HttpHeaders headers) throws Exception {
+    public VerifyRegisterResponseDTO loginAdmin(LoginRequestDTO body, String ip, HttpHeaders headers) throws Exception {
         UserEntity user = userRepository.findByUsernameOrEmailOrPhone(body.getUsername(), body.getEmail(), body.getPhone());
 
         if(user == null) {

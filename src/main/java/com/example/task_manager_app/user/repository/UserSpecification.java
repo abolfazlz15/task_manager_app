@@ -1,7 +1,7 @@
 package com.example.task_manager_app.user.repository;
 
 import com.example.task_manager_app.auth.entity.RoleEntity;
-import com.example.task_manager_app.common.dto.FilterRequest;
+import com.example.task_manager_app.common.dto.FilterRequestDTO;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import jakarta.persistence.criteria.*;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public final class UserSpecification {
 
-    public static Specification<UserEntity> filterBy(FilterRequest filter, PrivilegeEnum privilege) {
+    public static Specification<UserEntity> filterBy(FilterRequestDTO filter, PrivilegeEnum privilege) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 

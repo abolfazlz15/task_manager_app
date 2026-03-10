@@ -3,7 +3,6 @@ package com.example.task_manager_app.planning.table.services;
 import com.example.task_manager_app.common.exception.NotFoundException;
 import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.planning.table.dto.*;
-import com.example.task_manager_app.planning.table.entity.ColumnEntity;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
 import com.example.task_manager_app.planning.table.entity.TableStatisticEntity;
 import com.example.task_manager_app.planning.table.interfaces.TableMapper;
@@ -21,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.List;
-import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,7 +37,7 @@ public class TableServiceImpl implements TableService {
 
     @Override
     @Transactional
-    public TableResponse create(CreateTableRequest tableData, Principal principal) {
+    public TableResponseDTO addTable(TableRequestDTO tableData, Principal principal) {
         Long userId = tableData.getUserId() != null
                 ? tableData.getUserId()
                 : Long.parseLong(principal.getName());
@@ -50,22 +49,18 @@ public class TableServiceImpl implements TableService {
         table.setUser(userProxy);
 
         TableEntity tableSaved = tableRepository.save(table);
-        return new TableResponse(
-                tableSaved.getId(),
-                tableSaved.getUser().getId(),
-                tableSaved.getName(),
-                tableSaved.getDescription(),
-                tableSaved.getCreatedAt()
-        );
+        return tableMapper.toTableResponseDTO(tableSaved);
     }
 
     @Override
     @Transactional
-    public void updateDetail(Long tableId, UpdateTableDetailRequest tableDetailData, Principal principal) {
+    public void updateDetailTable(Long tableId, TableDetailRequestDTO tableDetailData, Principal principal) {
         Long userId = tableDetailData.getUserId() != null
                 ? tableDetailData.getUserId()
                 : Long.parseLong(principal.getName());
-        TableEntity existingTable = tableRepository.findTableByUserIdAndTableId(tableId, userId)
+        System.out.println(userId);
+        System.out.println(tableId);
+        TableEntity existingTable = tableRepository.findTableByUserIdAndTableId(userId, tableId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
 
         columnRepository.deleteByTableId(tableId);
@@ -86,7 +81,7 @@ public class TableServiceImpl implements TableService {
 
     @Override
     @Transactional
-    public TableResponse update(Long tableId, UpdateTableRequest tableData, Principal principal) {
+    public TableResponseDTO updateTable(Long tableId, TableRequestDTO tableData, Principal principal) {
         Long userId = tableData.getUserId() != null
                 ? tableData.getUserId()
                 : Long.parseLong(principal.getName());
@@ -98,38 +93,21 @@ public class TableServiceImpl implements TableService {
         }
         table.setName(tableData.getName());
         TableEntity saved = tableRepository.save(table);
-        return new TableResponse(
-                saved.getId(),
-                saved.getUser().getId(),
-                saved.getName(),
-                saved.getDescription(),
-                saved.getCreatedAt()
-        );
+        return tableMapper.toTableResponseDTO(saved);
     }
 
     @Override
-    public TableDetailResponse getTable(Long tableId, Long userId,Principal principal) {
+    public TableDetailResponseDTO getTable(Long tableId, Long userId, Principal principal) {
         Long existsUserId = userId != null ? userId : Long.parseLong(principal.getName());
-        TableEntity table = tableRepository.findTableWithColumnsAndRows(tableId, existsUserId)
+
+        TableEntity table = tableRepository.findTableWithColumnsAndRows(existsUserId, tableId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
 
-        List<TableDetailResponse.ColumnRequest> columns = table.getColumns()
-                .stream()
-                .map(this::mapColumn)
-                .toList();
-
-        return new TableDetailResponse(
-                table.getId(),
-                table.getName(),
-                table.getDescription(),
-                table.getScore(),
-                table.getCreatedAt(),
-                columns
-        );
+        return tableMapper.toTableDetailResponseDTO(table);
     }
 
     @Override
-    public CustomPageResponse<TableResponse> getAllTable(TableFilter filter, Principal principal, boolean isAdmin) {
+    public CustomPageResponse<TableResponseDTO> getTables(TableFilterDTO filter, Principal principal, boolean isAdmin) {
         Sort sort = Sort.by(filter.getSortDirection(), filter.getSortBy());
         Pageable pageable = PageRequest.of(
                 filter.getPage(),
@@ -141,51 +119,28 @@ public class TableServiceImpl implements TableService {
         }
 
         Specification<TableEntity> spec = TableSpecification.getTablesByFilter(filter);
-        Page<TableEntity> tablePage = tableRepository.findAll(spec, pageable);
-        Page<TableResponse> responsePage = tablePage.map(table -> TableResponse.builder()
-                .id(table.getId())
-                .userId(table.getUser().getId())
-                .name(table.getName())
-                .description(table.getDescription())
-                .createdAt(table.getCreatedAt())
-                .build()
+        CustomPageResponse<TableEntity> tables = CustomPageResponse.fromPage(
+                tableRepository.findAll(spec, pageable)
         );
-        return CustomPageResponse.fromPage(responsePage);
-    }
-
-    private TableDetailResponse.ColumnRequest mapColumn(ColumnEntity column) {
-        List<TableDetailResponse.RowRequest> rows = column.getRows()
-                .stream()
-                .map(row -> new TableDetailResponse.RowRequest(
-                        row.getId(),
-                        row.getIndex(),
-                        row.getValue(),
-                        row.getDataType()
-                ))
-                .toList();
-
-        return new TableDetailResponse.ColumnRequest(
-                column.getId(),
-                column.getIndex(),
-                column.getName(),
-                rows
-        );
+        return tableMapper.toTableResponseDTOPagination(tables);
     }
 
     @Override
-    public List<TableStatisticsResponse> getTableStatistics(Long tableId, GetTableStatisticsRequest queryParam, boolean isAdmin, Principal principal) {
+    public List<TableStatisticsResponseDTO> getTableStatistics(Long tableId, TableStatisticsFilterDTO queryParam, boolean isAdmin, Principal principal) {
         Long existsUserId = isAdmin && queryParam.getUserId() != null ? queryParam.getUserId() : Long.parseLong(principal.getName());
-        TableEntity existingTable = tableRepository.findTableByUserIdAndTableId(tableId, existsUserId)
+        TableEntity existingTable = tableRepository.findTableByUserIdAndTableId(existsUserId, tableId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
 
         List<TableStatisticEntity> statistics = tableStatisticRepository.findByTableAndBetween(existingTable, queryParam.getFrom(), queryParam.getTo());
 
-        return statistics.stream().map(item -> new TableStatisticsResponse(item.getId(), item.getScore(), item.getCreatedAt())).toList();
+        return statistics.stream()
+                .map(tableMapper::toTableStatisticsResponse)
+                .toList();
     }
 
     @Override
     @Transactional
-    public void delete(Long tableId) {
+    public void deleteTable(Long tableId) {
         tableRepository.deleteById(tableId);
     }
 }

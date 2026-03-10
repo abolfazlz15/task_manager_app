@@ -8,14 +8,14 @@ import org.springframework.http.HttpHeaders;
 import com.example.task_manager_app.user.entity.UserEntity;
 
 public interface AuthService {
-    public void register(RegisterRequest registerRequest);
-    public VerifyRegisterResponse verifyRegister(VerifyRegisterRequest verifyRegisterRequest, String ip, HttpHeaders headers) throws Exception;
-    public VerifyRegisterResponse generateTokens(UserEntity user, String ip, HttpHeaders headers) throws Exception;
-    public VerifyRegisterResponse login(LoginDto body, String ip, HttpHeaders headers) throws Exception;
-    public VerifyRegisterResponse refreshToken(RefreshRequest refreshRequest) throws Exception;
-    public void logout(Principal principal, LogoutRequest body) throws Exception;
-    public void forgetPasswordSendOtp(ForgetPasswordSendOtpRequest body);
-    public ForgetPasswordVerifyOtpResponse forgetPasswordVerifyOtp(ForgetPasswordVerifyOtpRequest body);
-    public void forgetPassword(ForgetPasswordRequest body) throws Exception;
-    public VerifyRegisterResponse loginAdmin(LoginDto body, String ip, HttpHeaders headers) throws Exception;
+    public void register(RegisterRequestDTO registerRequestDTO);
+    public VerifyRegisterResponseDTO verifyRegister(VerifyRegisterRequestDTO verifyRegisterRequestDTO, String ip, HttpHeaders headers) throws Exception;
+    public VerifyRegisterResponseDTO generateTokens(UserEntity user, String ip, HttpHeaders headers) throws Exception;
+    public VerifyRegisterResponseDTO login(LoginRequestDTO body, String ip, HttpHeaders headers) throws Exception;
+    public VerifyRegisterResponseDTO refreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO) throws Exception;
+    public void logout(Principal principal, RefreshTokenRequestDTO body) throws Exception;
+    public void forgetPasswordSendOtp(ForgetPasswordSendOtpRequestDTO body);
+    public ForgetPasswordVerifyOtpResponseDTO forgetPasswordVerifyOtp(ForgetPasswordVerifyOtpRequestDTO body);
+    public void resetPassword(ResetPasswordRequestDTO body) throws Exception;
+    public VerifyRegisterResponseDTO loginAdmin(LoginRequestDTO body, String ip, HttpHeaders headers) throws Exception;
 }

@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
 
-import com.example.task_manager_app.common.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.task_manager_app.common.exception.BadRequestException;
 import com.example.task_manager_app.common.service.AesUtil;
-import com.example.task_manager_app.user.dto.SessionRefreshTokenPayload;
+import com.example.task_manager_app.user.dto.RefreshTokenPayloadDTO;
 import com.example.task_manager_app.user.entity.SessionEntity;
 import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.interfaces.SessionService;
@@ -42,7 +41,7 @@ public class SessionServiceImpl implements SessionService {
         this.expiresInSeconds = expiresInSeconds;
     }
 
-    public String sign(SessionRefreshTokenPayload payload) throws Exception {
+    public String sign(RefreshTokenPayloadDTO payload) throws Exception {
         byte[] keyBytes = KeyGenerators.secureRandom(16).generateKey();
         String key = Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes);
 

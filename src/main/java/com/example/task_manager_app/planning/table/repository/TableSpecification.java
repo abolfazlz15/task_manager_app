@@ -1,6 +1,6 @@
 package com.example.task_manager_app.planning.table.repository;
 
-import com.example.task_manager_app.planning.table.dto.TableFilter;
+import com.example.task_manager_app.planning.table.dto.TableFilterDTO;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class TableSpecification {
 
-    public static Specification<TableEntity> getTablesByFilter(TableFilter filter) {
+    public static Specification<TableEntity> getTablesByFilter(TableFilterDTO filter) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 

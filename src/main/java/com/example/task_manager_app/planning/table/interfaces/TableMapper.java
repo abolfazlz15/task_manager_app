@@ -1,19 +1,37 @@
 package com.example.task_manager_app.planning.table.interfaces;
 
-import com.example.task_manager_app.planning.table.dto.UpdateTableDetailRequest;
+import com.example.task_manager_app.common.response.CustomPageResponse;
+import com.example.task_manager_app.planning.table.dto.TableDetailResponseDTO;
+import com.example.task_manager_app.planning.table.dto.TableResponseDTO;
+import com.example.task_manager_app.planning.table.dto.TableDetailRequestDTO;
+import com.example.task_manager_app.planning.table.dto.TableStatisticsResponseDTO;
 import com.example.task_manager_app.planning.table.entity.ColumnEntity;
 import com.example.task_manager_app.planning.table.entity.RowEntity;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
+import com.example.task_manager_app.planning.table.entity.TableStatisticEntity;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
 
 @Mapper(componentModel = "spring")
 public interface TableMapper {
-    void updateEntityFromDto(UpdateTableDetailRequest dto, @MappingTarget TableEntity entity);
+    void updateEntityFromDto(TableDetailRequestDTO dto, @MappingTarget TableEntity entity);
+    ColumnEntity toEntity(TableDetailRequestDTO.ColumnRequest dto);
+    RowEntity toEntity(TableDetailRequestDTO.RowRequest dto);
+    CustomPageResponse<TableResponseDTO> toTableResponseDTOPagination(CustomPageResponse<TableEntity> entity);
 
-    ColumnEntity toEntity(UpdateTableDetailRequest.ColumnRequest dto);
-    RowEntity toEntity(UpdateTableDetailRequest.RowRequest dto);
+    @Mapping(target = "userId", source = "user.id")
+    TableResponseDTO toTableResponseDTO(TableEntity entity);
+
+    @Mapping(target = "columns", source = "columns")
+    TableDetailResponseDTO toTableDetailResponseDTO(TableEntity entity);
+
+    @Mapping(target = "rows", source = "rows")
+    TableDetailResponseDTO.ColumnRequest toColumnRequest(ColumnEntity entity);
+    TableDetailResponseDTO.RowRequest toRowRequest(RowEntity entity);
+    TableStatisticsResponseDTO toTableStatisticsResponse(TableStatisticEntity entity);
 
     @AfterMapping
     default void linkRelations(@MappingTarget TableEntity table) {

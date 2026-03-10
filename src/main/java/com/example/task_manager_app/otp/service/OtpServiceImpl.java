@@ -11,8 +11,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.task_manager_app.common.exception.BadRequestException;
-import com.example.task_manager_app.otp.dto.CreateOtpDto;
-import com.example.task_manager_app.otp.dto.VerifyOtpDto;
+import com.example.task_manager_app.otp.dto.CreateOtpDTO;
+import com.example.task_manager_app.otp.dto.VerifyOtpDTO;
 import com.example.task_manager_app.otp.enums.OtpTypeEnum;
 import com.example.task_manager_app.otp.interfaces.OtpService;
 
@@ -37,20 +37,20 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
-    public String createOtp(CreateOtpDto createOtpDto) {
-        String otpKey = "%s-%s-%s".formatted(createOtpDto.getId(), createOtpDto.getType(), createOtpDto.getOperation());
+    public String createOtp(CreateOtpDTO createOtpDTO) {
+        String otpKey = "%s-%s-%s".formatted(createOtpDTO.getId(), createOtpDTO.getType(), createOtpDTO.getOperation());
         String attemptsKey = otpKey + ":attempts";
 
-        long otpTtl = createOtpDto.getTtl() != null ? createOtpDto.getTtl() : otpDefaultTtl;
+        long otpTtl = createOtpDTO.getTtl() != null ? createOtpDTO.getTtl() : otpDefaultTtl;
         long attemptsTtl = otpTtl + 10;
 
-        if (createOtpDto.getTimeout() != null) {
+        if (createOtpDTO.getTimeout() != null) {
             String previousOtp = template.opsForValue().get(otpKey);
             if (previousOtp != null) {
                 try {
                     long createdTime = Long.parseLong(previousOtp.split(":", 2)[0]);
                     long currentTime = Instant.now().getEpochSecond();
-                    if (createdTime >= currentTime - createOtpDto.getTimeout()) {
+                    if (createdTime >= currentTime - createOtpDTO.getTimeout()) {
                         throw new BadRequestException("try later");
                     }
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -60,7 +60,7 @@ public class OtpServiceImpl implements OtpService {
         }
 
         long time = Instant.now().getEpochSecond();
-        String code = generateCode(createOtpDto.getType());
+        String code = generateCode(createOtpDTO.getType());
         String otp = time + ":" + code;
 
         template.opsForValue().set(attemptsKey, "0", Duration.ofSeconds(attemptsTtl));
@@ -85,7 +85,7 @@ public class OtpServiceImpl implements OtpService {
     }
     
     @Override
-    public void verifyOtp(VerifyOtpDto verifyOtpDto) {
+    public void verifyOtp(VerifyOtpDTO verifyOtpDto) {
         String otpKey = "%s-%s-%s".formatted(
             verifyOtpDto.getId(),
             verifyOtpDto.getType(),

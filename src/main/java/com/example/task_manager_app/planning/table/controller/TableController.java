@@ -18,50 +18,50 @@ import java.util.List;
 public class TableController {
     private final TableService tableService;
 
-    @PostMapping("/create")
-    public ResponseEntity<TableResponse> createTable(@RequestBody @Valid CreateTableRequest body, Principal principal) {
-        TableResponse table = tableService.create(body, principal);
+    @PostMapping
+    public ResponseEntity<TableResponseDTO> addTable(@RequestBody @Valid TableRequestDTO body, Principal principal) {
+        TableResponseDTO table = tableService.addTable(body, principal);
         return ResponseEntity.status(201).body(table);
     }
 
-    @PutMapping("/update/detail/{tableId}")
+    @PutMapping("/{tableId}/detail")
     @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
-    public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableDetailRequest body, Principal principal) {
-        tableService.updateDetail(tableId, body, principal);
+    public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @RequestBody @Valid TableDetailRequestDTO body, Principal principal) {
+        tableService.updateDetailTable(tableId, body, principal);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/update/{tableId}")
+    @PatchMapping("/{tableId}")
     @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
-    public ResponseEntity<TableResponse> updateTable(@PathVariable Long tableId, @RequestBody @Valid UpdateTableRequest body, Principal principal) {
-        TableResponse table = tableService.update(tableId, body, principal);
+    public ResponseEntity<TableResponseDTO> updateTable(@PathVariable Long tableId, @RequestBody @Valid TableRequestDTO body, Principal principal) {
+        TableResponseDTO table = tableService.updateTable(tableId, body, principal);
         return ResponseEntity.status(200).body(table);
     }
 
     @GetMapping
-    public ResponseEntity<CustomPageResponse<TableResponse>> getAllTables(TableFilter filter, Principal principal) {
-        CustomPageResponse<TableResponse> table = tableService.getAllTable(filter, principal, false);
+    public ResponseEntity<CustomPageResponse<TableResponseDTO>> getTables(TableFilterDTO filter, Principal principal) {
+        CustomPageResponse<TableResponseDTO> table = tableService.getTables(filter, principal, false);
         return ResponseEntity.status(200).body(table);
     }
 
-    @GetMapping("/detail/{tableId}")
+    @GetMapping("/{tableId}")
     @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
-    public ResponseEntity<TableDetailResponse> getTable(@PathVariable Long tableId, Principal principal) {
-        TableDetailResponse table = tableService.getTable(tableId, null, principal);
+    public ResponseEntity<TableDetailResponseDTO> getTable(@PathVariable Long tableId, Principal principal) {
+        TableDetailResponseDTO table = tableService.getTable(tableId, null, principal);
         return ResponseEntity.status(200).body(table);
     }
 
     @DeleteMapping("/{tableId}")
     @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
     public ResponseEntity<Void> deleteTable(@PathVariable("tableId") Long tableId) {
-        tableService.delete(tableId);
+        tableService.deleteTable(tableId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{tableId}/statistics")
     @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
-    public ResponseEntity<List<TableStatisticsResponse>> getTableStatistics(Principal principal, @PathVariable("tableId") Long tableId, @Valid GetTableStatisticsRequest queryParam) {
-        List<TableStatisticsResponse> res = this.tableService.getTableStatistics(tableId, queryParam, false,principal);
+    public ResponseEntity<List<TableStatisticsResponseDTO>> getTableStatistics(Principal principal, @PathVariable("tableId") Long tableId, @Valid TableStatisticsFilterDTO queryParam) {
+        List<TableStatisticsResponseDTO> res = this.tableService.getTableStatistics(tableId, queryParam, false,principal);
         return ResponseEntity.status(200).body(res);
     }
 }
