@@ -3,10 +3,13 @@ package com.example.task_manager_app.common.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.task_manager_app.common.response.ApiResponse;
@@ -17,90 +20,49 @@ import com.example.task_manager_app.common.response.ErrorResponse;
 public class GlobalException {
     private static final String BAD_REQUEST_MESSAGE = "Invalid data";
     private static final String INTERNAL_SERVER_MESSAGE = "Something went wrong";
+    private static final String METHOD_NOT_SUPPORTED_MESSAGE = "HTTP method not supported";
 
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleNoHandlerFound(NoResourceFoundException ex) {
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleUnauthorized(UnauthorizedException ex) {
+        return build(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleInvalidArgument(MethodArgumentNotValidException ex) {
-        ErrorResponse err = new ErrorResponse(BAD_REQUEST_MESSAGE,
-                HttpStatus.BAD_REQUEST.value(),
-                System.currentTimeMillis());
-
-        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return build(HttpStatus.METHOD_NOT_ALLOWED, METHOD_NOT_SUPPORTED_MESSAGE);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleNotFoundException(NotFoundException ex) {
-        ErrorResponse err = new ErrorResponse(ex.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                System.currentTimeMillis());
-
-        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
+    @ExceptionHandler({
+            BadRequestException.class,
+            IllegalArgumentException.class,
+            MethodArgumentNotValidException.class,
+            HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class
+    })
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleBadRequest(Exception ex) {
+        return build(HttpStatus.BAD_REQUEST, BAD_REQUEST_MESSAGE);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleBadRequestException(BadRequestException ex) {
-        ErrorResponse err = new ErrorResponse(ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                System.currentTimeMillis());
 
-        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler({ForbiddenException.class, AccessDeniedException.class})
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleForbidden(Exception ex) {
+        return build(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(IllegalArgumentException ex) {
-        ErrorResponse err = new ErrorResponse(BAD_REQUEST_MESSAGE,
-                HttpStatus.BAD_REQUEST.value(),
-                System.currentTimeMillis());
-
-        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler({NotFoundException.class, NoResourceFoundException.class})
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleNotFound(Exception ex) {
+        return build(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleUnauthorizedException(UnauthorizedException ex) {
-        ErrorResponse err = new ErrorResponse(ex.getMessage(),
-                HttpStatus.UNAUTHORIZED.value(),
-                System.currentTimeMillis());
-
-        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAll(Exception ex) {
+        log.error("Unhandled exception occurred", ex);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_MESSAGE);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleForbiddenException(ForbiddenException ex) {
-        ErrorResponse err = new ErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN.value(),
-                System.currentTimeMillis());
-
+    private ResponseEntity<ApiResponse<ErrorResponse>> build(HttpStatus status, String message) {
+        ErrorResponse err = new ErrorResponse(message, status.value(), System.currentTimeMillis());
         ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleAllExceptions(Exception ex) {
-        ErrorResponse err = new ErrorResponse(INTERNAL_SERVER_MESSAGE,
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                System.currentTimeMillis());
-
-        log.error("Unhandled exception occurred: ", ex);
-
-        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleAccessDeniedException(AccessDeniedException ex) {
-        ErrorResponse err = new ErrorResponse("Access Denied: You do not have permission to access this resource",
-                HttpStatus.FORBIDDEN.value(),
-                System.currentTimeMillis());
-
-        ApiResponse<ErrorResponse> res = new ApiResponse<>(null, err);
-        return new ResponseEntity<>(res, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(res, status);
     }
 }
