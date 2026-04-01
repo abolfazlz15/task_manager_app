@@ -15,7 +15,6 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminRequestDTO extends BaseProfileRequestDTO {
-    @Max(100)
     @NotBlank(groups = ValidationGroups.Create.class)
     @NotNull(groups = ValidationGroups.Create.class)
     private String password;

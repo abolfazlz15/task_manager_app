@@ -13,5 +13,5 @@ public interface UserService {
     public ProfileResponseDTO getProfile(Principal principal);
     public ProfileResponseDTO updateUser(Principal principal, UserRequestDTO body) throws IOException;
     public UserEntity updateProfile(long userId, AdminRequestDTO body, PrivilegeEnum side) throws IOException;
-    public void addUser(AdminRequestDTO body, PrivilegeEnum side) throws Exception;
+    public void addProfile(AdminRequestDTO body, PrivilegeEnum side) throws Exception;
 }

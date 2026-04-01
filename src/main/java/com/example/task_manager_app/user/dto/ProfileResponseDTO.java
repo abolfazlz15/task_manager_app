@@ -1,6 +1,7 @@
 package com.example.task_manager_app.user.dto;
 
 import com.example.task_manager_app.auth.entity.RoleEntity;
+import com.example.task_manager_app.user.enums.PrivilegeEnum;
 import com.example.task_manager_app.user.enums.UserGenderEnum;
 import com.example.task_manager_app.user.enums.UserStatusEnum;
 import lombok.Getter;
@@ -22,6 +23,8 @@ public class ProfileResponseDTO {
     private UserGenderEnum gender;
     private String bio;
     private String profileImage;
+    private PrivilegeEnum privilege;
     private UserStatusEnum status;
     private Set<RoleEntity> roles;
+    private Instant createdAt;
 }

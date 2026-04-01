@@ -50,6 +50,14 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Invalid identifier please verify your input and try again");
         }
 
+        if(!user.getPrivilege().equals(PrivilegeEnum.USER)) {
+            throw new NotFoundException("User not found");
+        }
+
+        if(!user.getStatus().equals(UserStatusEnum.ACTIVE)) {
+            throw new ForbiddenException("User is not registered");
+        }
+
         boolean isMatch = passwordEncoder.matches(body.getPassword(), user.getPassword());
 
         if(!isMatch) {
