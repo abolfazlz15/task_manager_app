@@ -7,14 +7,9 @@ import com.example.task_manager_app.user.dto.ProfileResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.task_manager_app.user.dto.UserRequestDTO;
-import com.example.task_manager_app.user.entity.UserEntity;
 import com.example.task_manager_app.user.interfaces.UserService;
 
 import jakarta.validation.Valid;
@@ -31,7 +26,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getProfile(principal));
     }
 
-    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProfileResponseDTO> updateUser(Principal principal, @ModelAttribute @Valid UserRequestDTO body) throws IOException {
         return ResponseEntity.ok(userService.updateUser(principal, body));
     }

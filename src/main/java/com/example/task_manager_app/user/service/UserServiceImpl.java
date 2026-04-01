@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addUser(AdminRequestDTO body, PrivilegeEnum privilege) throws Exception {
+    public void addProfile(AdminRequestDTO body, PrivilegeEnum privilege) throws Exception {
         boolean isProfileExist = userRepository.existsByUsernameOrEmailOrPhone(body.getUsername(), body.getEmail(), body.getPhone());
         if(isProfileExist) {
             throw new BadRequestException("Invalid identifier please verify your input and try again");
@@ -56,6 +56,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity profile = new UserEntity();
 
+        profile.setPrivilege(privilege);
         profile.setEmail(body.getEmail());
         profile.setUsername(body.getUsername());
         profile.setPassword(passwordEncoder.encode(body.getPassword()));

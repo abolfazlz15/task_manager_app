@@ -22,7 +22,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     Optional<UserEntity> findByIdAndPrivilege(long userId, PrivilegeEnum privilege);
 
     boolean existsByIdAndStatusIs(Long id,  UserStatusEnum status);
-    boolean existsByUsernameOrEmailOrPhone(String username, String email, String phone);
     boolean existsByUsername(String username);
     boolean existsByPhone(String phone);
     boolean existsByEmail(String email);
@@ -31,4 +30,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     @Query("SELECT u FROM UserEntity u WHERE u.username = :username OR u.email = :email OR u.phone = :phone")
     UserEntity findByUsernameOrEmailOrPhone(@Param("username") String username, @Param("email") String email, @Param("phone") String phone);
+
+    @Query("SELECT CASE WHEN COUNT(u) > 0THEN TRUE ELSE FALSE END FROM UserEntity u WHERE u.username = :username OR u.email = :email OR u.phone = :phone")
+    boolean existsByUsernameOrEmailOrPhone(@Param("username") String username, @Param("email") String email, @Param("phone") String phone);
 }
