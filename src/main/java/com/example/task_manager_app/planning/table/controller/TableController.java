@@ -5,12 +5,12 @@ import com.example.task_manager_app.planning.table.dto.*;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/table")
@@ -60,8 +60,15 @@ public class TableController {
 
     @GetMapping("/{tableId}/statistics")
     @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
-    public ResponseEntity<List<TableStatisticsResponseDTO>> getTableStatistics(Principal principal, @PathVariable("tableId") Long tableId, @Valid TableStatisticsFilterDTO queryParam) {
-        List<TableStatisticsResponseDTO> res = this.tableService.getTableStatistics(tableId, queryParam, false,principal);
+    public ResponseEntity<TableStatisticsResponseDTO> getTableStatistics(Principal principal, @PathVariable("tableId") Long tableId, @Valid TableStatisticsFilterDTO queryParam, Pageable pageable) {
+        TableStatisticsResponseDTO res = this.tableService.getTableStatistics(tableId, queryParam, false,principal, pageable);
         return ResponseEntity.status(200).body(res);
+    }
+
+    @PostMapping("/{tableId}/statistics")
+    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
+    public ResponseEntity<Void> addTableStatistic(Principal principal, @PathVariable("tableId") Long tableId) {
+        this.tableService.addTableStatistic(tableId, principal);
+        return ResponseEntity.status(200).build();
     }
 }

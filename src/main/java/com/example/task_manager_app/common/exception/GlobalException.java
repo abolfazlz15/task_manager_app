@@ -32,8 +32,12 @@ public class GlobalException {
         return build(HttpStatus.METHOD_NOT_ALLOWED, METHOD_NOT_SUPPORTED_MESSAGE);
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleBadRequest(BadRequestException ex) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler({
-            BadRequestException.class,
             IllegalArgumentException.class,
             MethodArgumentNotValidException.class,
             HttpMessageNotReadableException.class,

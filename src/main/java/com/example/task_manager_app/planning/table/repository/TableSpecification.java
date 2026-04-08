@@ -1,7 +1,9 @@
 package com.example.task_manager_app.planning.table.repository;
 
 import com.example.task_manager_app.planning.table.dto.TableFilterDTO;
+import com.example.task_manager_app.planning.table.dto.TableStatisticsFilterDTO;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
+import com.example.task_manager_app.planning.table.entity.TableStatisticEntity;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.util.StringUtils;
@@ -64,6 +66,18 @@ public class TableSpecification {
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<TableStatisticEntity> getTableStatisticByFilter(TableStatisticsFilterDTO filter, TableEntity table) {
+        return  (root, query,  cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(cb.isNull(root.get("deletedAt")));
+            predicates.add(cb.equal(root.get("table"),  table));
+            predicates.add(cb.between(root.get("createdAt"), filter.getFrom(), filter.getTo()));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 }

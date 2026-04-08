@@ -1,10 +1,11 @@
 package com.example.task_manager_app.planning.table.dto;
 
-import jakarta.validation.constraints.AssertTrue;
+import com.example.task_manager_app.common.constant.IConstant;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.Instant;
@@ -13,7 +14,7 @@ import java.time.Instant;
 @Setter
 @AllArgsConstructor
 public class TableStatisticsFilterDTO {
-    Long userId;
+    private Long userId;
     
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -23,12 +24,11 @@ public class TableStatisticsFilterDTO {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Instant to;
 
-    @AssertTrue
-    public boolean isFromBeforeTo() {
-        if (from == null || to == null) {
-            return false;
-        }
+    private Integer page = 0;
 
-        return from.isBefore(to);
-    }
+    private Integer pageSize = IConstant.DEFAULT_PAGE_SIZE;
+
+    private String sortBy = "createdAt";
+
+    private Sort.Direction sortDirection = Sort.Direction.DESC;
 }
