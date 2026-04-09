@@ -21,6 +21,18 @@ public class TableStatisticEntity extends BaseEntity {
     @Column
     private Short score = 0;
 
+    @Column
+    private Short monthlyScore = 0;
+
+    @Column
+    private Short seasonalScore = 0;
+
+    @Column
+    private Short annualScore = 0;
+
+    @Column
+    private Short overallScore = 0;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> meta;
