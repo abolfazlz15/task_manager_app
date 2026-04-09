@@ -1,6 +1,7 @@
 package com.example.task_manager_app.planning.table.entity;
 
 import com.example.task_manager_app.common.entity.BaseEntity;
+import com.example.task_manager_app.planning.table.enums.TemplateTypeEnum;
 import com.example.task_manager_app.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -47,4 +48,7 @@ public class TableEntity extends BaseEntity {
 
     @Column
     private Short score = 0;
+
+    @Column(name = "template_type")
+    private TemplateTypeEnum templateType;
 }
