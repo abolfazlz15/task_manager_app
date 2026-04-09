@@ -6,6 +6,7 @@ import com.example.task_manager_app.common.response.CustomPageResponse;
 import com.example.task_manager_app.planning.table.dto.*;
 import com.example.task_manager_app.planning.table.entity.TableEntity;
 import com.example.task_manager_app.planning.table.entity.TableStatisticEntity;
+import com.example.task_manager_app.planning.table.enums.TemplateTypeEnum;
 import com.example.task_manager_app.planning.table.interfaces.TableMapper;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
 import com.example.task_manager_app.planning.table.repository.ColumnRepository;
@@ -146,7 +147,7 @@ public class TableServiceImpl implements TableService {
 
         Instant now = Instant.now();
 
-        if (true) { // TODO: check table enum if it's equal weekly
+        if (table.getTemplateType() == TemplateTypeEnum.WEEKLY) {
             Instant lastWeek = Instant.now().atZone(ZoneId.systemDefault()).minusWeeks(1).toInstant();
             boolean isEmpty = tableStatisticRepository.findByTableAndBetween(table, lastWeek, now).isEmpty();
             if(!isEmpty) {
