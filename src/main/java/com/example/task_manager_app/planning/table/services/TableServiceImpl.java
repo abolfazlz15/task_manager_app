@@ -51,6 +51,8 @@ public class TableServiceImpl implements TableService {
         table.setName(tableData.getName());
         table.setDescription(tableData.getDescription());
         table.setUser(userProxy);
+//        ****** temporary static value ******
+        table.setTemplateType(TemplateTypeEnum.WEEKLY);
 
         TableEntity tableSaved = tableRepository.save(table);
         return tableMapper.toTableResponseDTO(tableSaved);
