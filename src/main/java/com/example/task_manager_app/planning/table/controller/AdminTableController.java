@@ -49,7 +49,7 @@ public class AdminTableController {
 
     @PutMapping("/{tableId}/detail")
     @PreAuthorize("@authManager.hasPermission(authentication, 'TABLE_READ')")
-    public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @Validated(TableValidationGroups.Admin.class) @RequestBody TableDetailRequestDTO body, Principal principal) {
+    public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @Validated(TableValidationGroups.Admin.class) @RequestBody TableCreateRequestDTO body, Principal principal) {
         tableService.updateDetailTable(tableId, body, principal);
         return ResponseEntity.ok().build();
     }

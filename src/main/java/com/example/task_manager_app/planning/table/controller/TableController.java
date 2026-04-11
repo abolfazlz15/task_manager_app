@@ -25,8 +25,8 @@ public class TableController {
     }
 
     @PutMapping("/{tableId}/detail")
-    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
-    public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @RequestBody @Valid TableDetailRequestDTO body, Principal principal) {
+//    @PreAuthorize("@ownershipManager.isTableOwner(authentication, #tableId)")
+    public ResponseEntity<Void> updateDetailTable(@PathVariable Long tableId, @RequestBody @Valid TableCreateRequestDTO body, Principal principal) {
         tableService.updateDetailTable(tableId, body, principal);
         return ResponseEntity.ok().build();
     }
