@@ -31,7 +31,6 @@ public interface TableMapper {
     @Mapping(target = "rows", source = "rows")
     TableDetailResponseDTO.ColumnRequest toColumnRequest(ColumnEntity entity);
     TableDetailResponseDTO.RowRequest toRowRequest(RowEntity entity);
-    TableStatisticsResponseDTO toTableStatisticsResponse(TableStatisticEntity entity);
 
     @AfterMapping
     default void linkRelations(@MappingTarget TableEntity table) {
@@ -44,4 +43,13 @@ public interface TableMapper {
             });
         }
     }
+
+    @Mapping(source = "statistic.monthlyScore", target = "monthlyScore")
+    @Mapping(source = "statistic.seasonalScore", target = "seasonalScore")
+    @Mapping(source = "statistic.annualScore", target = "annualScore")
+    @Mapping(source = "statistic.overallScore", target = "overallScore")
+    TableStatisticsResponseDTO toTableStatisticsResponseDTO(TableStatisticEntity statistic, CustomPageResponse<TableStatisticEntity> weeklyScores);
+
+    @Mapping(source = "content", target = "content")
+    CustomPageResponse<TableStatisticsResponseDTO.WeeklyScoreResponse> toWeeklyScoreResponse(CustomPageResponse<TableStatisticEntity> entity);
 }

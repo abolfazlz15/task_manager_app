@@ -5,13 +5,13 @@ import com.example.task_manager_app.planning.table.interfaces.TableService;
 import com.example.task_manager_app.planning.table.validation.TableValidationGroups;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequestMapping("admin/table")
@@ -63,8 +63,8 @@ public class AdminTableController {
 
     @GetMapping("/{tableId}/statistics")
     @PreAuthorize("@authManager.hasPermission(authentication, 'TABLE_READ')")
-    public ResponseEntity<List<TableStatisticsResponseDTO>> getTableStatistics(@PathVariable("tableId") Long tableId, @Valid TableStatisticsFilterDTO queryParam, Principal principal) {
-        List<TableStatisticsResponseDTO> res = this.tableService.getTableStatistics(tableId, queryParam, true, principal);
+    public ResponseEntity<TableStatisticsResponseDTO> getTableStatistics(@PathVariable("tableId") Long tableId, @Valid TableStatisticsFilterDTO queryParam, Principal principal, Pageable pageable) {
+        TableStatisticsResponseDTO res = this.tableService.getTableStatistics(tableId, queryParam, true, principal, pageable);
         return ResponseEntity.status(200).body(res);
     }
 
