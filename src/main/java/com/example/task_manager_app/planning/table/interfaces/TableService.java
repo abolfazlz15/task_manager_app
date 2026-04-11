@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface TableService {
     public TableResponseDTO addTable(TableRequestDTO tableData, Principal principal);
-    public void updateDetailTable(Long tableId, TableDetailRequestDTO tableDetailData, Principal principal);
+    public void updateDetailTable(Long tableId, TableCreateRequestDTO tableDetailData, Principal principal);
     public TableResponseDTO updateTable(Long tableId, TableRequestDTO tableData, Principal principal);
     public TableDetailResponseDTO getTable(Long tableId, Long userId, Principal principal);
     public CustomPageResponse<TableResponseDTO> getTables(TableFilterDTO filter, Principal principal, boolean isAdmin);

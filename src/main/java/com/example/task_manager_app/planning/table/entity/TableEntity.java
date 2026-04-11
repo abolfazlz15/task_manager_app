@@ -50,5 +50,6 @@ public class TableEntity extends BaseEntity {
     private Short score = 0;
 
     @Column(name = "template_type")
+    @Enumerated(EnumType.STRING)
     private TemplateTypeEnum templateType;
 }

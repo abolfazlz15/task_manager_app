@@ -9,7 +9,8 @@ import com.example.task_manager_app.planning.table.entity.TableStatisticEntity;
 import com.example.task_manager_app.planning.table.enums.TemplateTypeEnum;
 import com.example.task_manager_app.planning.table.interfaces.TableMapper;
 import com.example.task_manager_app.planning.table.interfaces.TableService;
-import com.example.task_manager_app.planning.table.repository.ColumnRepository;
+import com.example.task_manager_app.planning.table.interfaces.TemplateAssembler;
+import com.example.task_manager_app.planning.table.interfaces.TemplateValidator;
 import com.example.task_manager_app.planning.table.repository.TableRepository;
 import com.example.task_manager_app.planning.table.repository.TableSpecification;
 import com.example.task_manager_app.planning.table.repository.TableStatisticRepository;
@@ -36,8 +37,10 @@ public class TableServiceImpl implements TableService {
     private final TableRepository tableRepository;
     private final UserRepository userRepository;
     private final TableMapper tableMapper;
-    private final ColumnRepository columnRepository;
+    private final TemplateDtoFactory dtoFactory;
+    private final TemplateValidatorRegistry validatorRegistry;
     private final TableStatisticRepository tableStatisticRepository;
+    private final TemplateAssemblerRegistry assemblerRegistry;
 
     @Override
     @Transactional
@@ -51,6 +54,8 @@ public class TableServiceImpl implements TableService {
         table.setName(tableData.getName());
         table.setDescription(tableData.getDescription());
         table.setUser(userProxy);
+//        ****** temporary static value ******
+        table.setTemplateType(TemplateTypeEnum.WEEKLY);
 
         TableEntity tableSaved = tableRepository.save(table);
         return tableMapper.toTableResponseDTO(tableSaved);
@@ -58,23 +63,38 @@ public class TableServiceImpl implements TableService {
 
     @Override
     @Transactional
-    public void updateDetailTable(Long tableId, TableDetailRequestDTO tableDetailData, Principal principal) {
+    public void updateDetailTable(Long tableId, TableCreateRequestDTO tableDetailData, Principal principal) {
         Long userId = tableDetailData.getUserId() != null
                 ? tableDetailData.getUserId()
                 : Long.parseLong(principal.getName());
-        System.out.println(userId);
-        System.out.println(tableId);
         TableEntity existingTable = tableRepository.findTableByUserIdAndTableId(userId, tableId)
                 .orElseThrow(() -> new NotFoundException("Table Not Found"));
+        TemplateTypeEnum type = existingTable.getTemplateType();
 
-        columnRepository.deleteByTableId(tableId);
-        existingTable.getColumns().clear();
-
-        tableMapper.updateEntityFromDto(tableDetailData, existingTable);
+        Class<?> dtoClass = resolveUpdateDetailTableDtoClass(type);
+        Object dto = dtoFactory.convert(tableDetailData.getPayload(), dtoClass);
+        validateUpdateDetailTable(type, dto);
         Double average = tableRepository.calculateAverage(existingTable.getId());
         short score = (average == null) ? 0 : (short) Math.round(average);
         existingTable.setScore(score);
         tableRepository.save(existingTable);
+        assembleAndSave(type, existingTable, dto);
+    }
+    private Class<?> resolveUpdateDetailTableDtoClass(TemplateTypeEnum type) {
+        return switch (type) {
+            case WEEKLY -> TableWeeklyTemplateDto.class;
+//            case MONTHLY -> TableMonthlyTemplateDto.class;
+        };
+    }
+    private <T> void validateUpdateDetailTable(TemplateTypeEnum type, T dto) {
+        TemplateValidator<T> validator = validatorRegistry.getValidator(type);
+        validator.validate(dto);
+    }
+
+    private <T> void assembleAndSave(TemplateTypeEnum type, TableEntity table, T dto) {
+        TemplateAssembler<T> assembler = assemblerRegistry.get(type);
+        TableEntity ready = assembler.assembleTable(table, dto);
+        tableRepository.save(ready);
     }
 
     @Override
