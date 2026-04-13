@@ -77,7 +77,6 @@ public class TableServiceImpl implements TableService {
         Double average = tableRepository.calculateAverage(existingTable.getId());
         short score = (average == null) ? 0 : (short) Math.round(average);
         existingTable.setScore(score);
-        tableRepository.save(existingTable);
         assembleAndSave(type, existingTable, dto);
     }
     private Class<?> resolveUpdateDetailTableDtoClass(TemplateTypeEnum type) {
@@ -93,8 +92,8 @@ public class TableServiceImpl implements TableService {
 
     private <T> void assembleAndSave(TemplateTypeEnum type, TableEntity table, T dto) {
         TemplateAssembler<T> assembler = assemblerRegistry.get(type);
-        TableEntity ready = assembler.assembleTable(table, dto);
-        tableRepository.save(ready);
+        TableEntity updatedTable = assembler.assembleTable(table, dto);
+        tableRepository.save(updatedTable);
     }
 
     @Override
