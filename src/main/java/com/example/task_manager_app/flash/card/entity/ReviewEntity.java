@@ -4,7 +4,9 @@ import com.example.task_manager_app.common.entity.BaseEntity;
 import com.example.task_manager_app.flash.card.enums.ReviewStateEnum;
 import com.example.task_manager_app.user.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -16,6 +18,8 @@ import java.util.Map;
 @Setter
 @Entity
 @Table(name = "reviews")
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReviewEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -32,8 +36,8 @@ public class ReviewEntity extends BaseEntity {
     @Column(name = "last_review")
     private Instant lastReview;
 
-    @Column(name = "interval_days", nullable = false)
-    private Integer intervalDays = 0;
+    @Column(nullable = false)
+    private Integer interval = 0;
 
     @Column(name="ease_factor", nullable = false)
     private Double easeFactor = 2.5;
