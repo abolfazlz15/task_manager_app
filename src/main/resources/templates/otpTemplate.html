@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-Up Confirmation</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f6f6f6;
+            margin: 0;
+            padding: 0;
+            color: #333333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #4CAF50;
+            padding: 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px;
+            text-align: center;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .code-box {
+            background-color: #f0f0f0;
+            border: 1px solid #dddddd;
+            border-radius: 4px;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 20px auto;
+            max-width: 200px;
+        }
+        .footer {
+            background-color: #f6f6f6;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Welcome to Our App!</h1>
+    </div>
+    <div class="content">
+        <p>Hi <span th:text="${name}">there</span>,</p>
+        <p>Thank you for signing up! To complete your registration, please use the verification code below:</p>
+        <div class="code-box" th:text="${code}">CODE</div>
+        <p>This code expires soon. If you didn't request this, please ignore this email.</p>
+        <a th:href="${code}" class="button">Verify Your Account</a>
+    </div>
+    <div class="footer">
+        <p>&copy; 2025 Your Company. All rights reserved.</p>
+        <p>If you have any questions, contact us at support@yourcompany.com</p>
+    </div>
+</div>
+</body>
+</html>

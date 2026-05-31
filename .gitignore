@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# custom
+.env
+logs/
+*.logs
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +35,6 @@ build/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/static
+
+/logs
